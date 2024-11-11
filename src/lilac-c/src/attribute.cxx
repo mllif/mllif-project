@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
+#include "lilac-c/pch.h"
 #include "lilac-c/attribute.h"
 
 #include <stack>
 #include <sstream>
-#include <clang/AST/ASTContext.h>
-#include <clang/AST/Attr.h>
-#include <clang/Sema/ParsedAttr.h>
-#include <clang/Sema/Sema.h>
 
 using namespace clang;
 
