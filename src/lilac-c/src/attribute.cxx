@@ -27,7 +27,7 @@ std::string lilac::c::Attributes::GetFullName(NamedDecl* decl)
     std::stack<std::string> stk;
     do
         stk.emplace(decl->getName());
-    while ((decl = clang::dyn_cast<NamespaceDecl>(decl->getDeclContext())));
+    while ((decl = clang::dyn_cast<NamedDecl>(decl->getDeclContext())));
 
     std::stringstream ss;
     for (; !stk.empty(); stk.pop())
@@ -38,11 +38,37 @@ std::string lilac::c::Attributes::GetFullName(NamedDecl* decl)
 
 void lilac::c::Attributes::Annotate(NamedDecl* namedDecl, const ParsedAttr& Attr)
 {
-    const auto annotation = AnnotateAttr::Create(
-        namedDecl->getASTContext(),
-        NS + GetFullName(namedDecl),
-        nullptr, 0,
-        Attr.getRange());
+    if (clang::dyn_cast<TypeDecl>(namedDecl))
+    {
+        const auto annotation = AnnotateTypeAttr::Create(
+            namedDecl->getASTContext(),
+            NS + GetFullName(namedDecl),
+            nullptr, 0,
+            Attr.getRange());
+
+        namedDecl->addAttr(annotation);
+
+        return;
+    }
+
+    AnnotateAttr* annotation;
+
+    if (clang::dyn_cast<ParmVarDecl>(namedDecl))
+    {
+        annotation = AnnotateAttr::Create(
+            namedDecl->getASTContext(),
+            NS + namedDecl->getNameAsString(),
+            nullptr, 0,
+            Attr.getRange());
+    }
+    else
+    {
+        annotation = AnnotateAttr::Create(
+            namedDecl->getASTContext(),
+            NS + GetFullName(namedDecl),
+            nullptr, 0,
+            Attr.getRange());
+    }
 
     namedDecl->addAttr(annotation);
 }
