@@ -66,6 +66,10 @@ namespace {
     auto GetTypeID(const clang::Type *type) -> TypeID {
         size_t refCnt = 0;
         while (true) {
+            if (const auto enumT = dyn_cast<clang::EnumType>(type)) {
+                type = enumT->getDecl()->getIntegerType().getTypePtr();
+            }
+
             if (const auto pointee = type->getPointeeType().getTypePtrOrNull()) {
                 type = pointee;
                 refCnt++;
