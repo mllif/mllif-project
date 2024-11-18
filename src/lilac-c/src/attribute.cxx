@@ -49,10 +49,17 @@ namespace {
         }
 
         auto handleDeclAttribute(clang::Sema &S, clang::Decl *D, const clang::ParsedAttr &/**/) const -> AttrHandling override {
+
+            /*
+             * Q. Why don't create annotations at this moment?
+             * A. Annotating types after whole AST built is required to retrieve proper type-info.
+             *    If I attempt to retrieve type-info before AST built,
+             *    default type size(1)/alignment(1) will be returned.
+             */
             if (const auto record = clang::dyn_cast<clang::RecordDecl>(D)) {
-                lilac::shared::MarkAsTarget(record);
+                lilac::shared::MarkAsTarget(record); // just mark a symbol to process it later
             } else if (const auto fn = clang::dyn_cast<clang::FunctionDecl>(D)) {
-                lilac::shared::MarkAsTarget(fn);
+                lilac::shared::MarkAsTarget(fn); // just mark a symbol to process it later
             } else {
                 const auto id = S.Diags.getCustomDiagID(
                     clang::DiagnosticsEngine::Warning,

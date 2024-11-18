@@ -35,22 +35,28 @@ class TypeInfoEmitter final : public clang::RecursiveASTVisitor<TypeInfoEmitter>
     }
 
     // ReSharper disable once CppMemberFunctionMayBeStatic
+    // ReSharper disable once CppMemberFunctionMayBeConst
     auto VisitFunctionDecl(clang::FunctionDecl *decl) -> bool {
-        if (ShouldBeAnnotated(decl)) {
-
-            if (const auto parent = llvm::dyn_cast<clang::TypeDecl>(decl->getParent());
-                !decl->isStatic() && parent && !ShouldBeAnnotated(parent)) {
-
-                auto &diag = Sema->getDiagnostics();
-                const auto diagId = diag.getCustomDiagID(
-                    clang::DiagnosticsEngine::Error,
-                    "Member function in not-exported record cannot be exported");
-                diag.Report(decl->getLocation(), diagId);
-                return false;
-            }
-
-            lilac::shared::CreateAnnotation(decl);
+        if (!ShouldBeAnnotated(decl)) {
+            return true;
         }
+
+        /*
+         * Parent record should be exported if its member is requested to be exported.
+         * If parent record wasn't exported, Backend couldn't recover interface
+         */
+        if (const auto parent = llvm::dyn_cast<clang::TypeDecl>(decl->getParent());
+            !decl->isStatic() && parent && !ShouldBeAnnotated(parent)) {
+
+            auto &diag = Sema->getDiagnostics();
+            const auto diagId = diag.getCustomDiagID(
+                clang::DiagnosticsEngine::Error,
+                "Member function in not-exported record cannot be exported");
+            diag.Report(decl->getLocation(), diagId);
+            return false;
+        }
+
+        lilac::shared::CreateAnnotation(decl);
 
         return true;
     }
