@@ -58,6 +58,10 @@ class TypeInfoEmitter final : public clang::RecursiveASTVisitor<TypeInfoEmitter>
 
         lilac::shared::CreateAnnotation(decl);
 
+        for (const auto arg : decl->parameters()) {
+            lilac::shared::CreateAnnotation(arg);
+        }
+
         return true;
     }
 };

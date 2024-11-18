@@ -181,6 +181,9 @@ void lilac::shared::CreateAnnotation(clang::NamedDecl *decl) {
         ApplyAnnotation(decl, ::CreateAnnotation(NAME, decl->getNameAsString()));
         ApplyAnnotation(decl, ::CreateAnnotation(CALLCONV, GetCallConv(funcDecl)));
         ApplyAnnotation(decl, ::CreateAnnotation(RETURN, GetTypeID(funcDecl->getReturnType().getTypePtr()).str()));
+    } else if (const auto paramDecl = dyn_cast<clang::ParmVarDecl>(decl)) {
+        ApplyAnnotation(decl, ::CreateAnnotation(NAME, decl->getNameAsString()));
+        ApplyAnnotation(decl, ::CreateAnnotation(TYPE, GetTypeID(paramDecl->getType().getTypePtr()).str()));
     }
 }
 
