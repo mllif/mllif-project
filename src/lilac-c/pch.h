@@ -18,6 +18,7 @@
 
 #include <clang/AST/ASTContext.h>
 #include <clang/AST/Attr.h>
+#include <clang/AST/RecursiveASTVisitor.h>
 #include <clang/CodeGen/CodeGenAction.h>
 #include <clang/CodeGen/ModuleBuilder.h>
 #include <clang/Frontend/FrontendAction.h>
@@ -25,3 +26,4 @@
 #include <clang/Frontend/CompilerInstance.h>
 #include <clang/Sema/ParsedAttr.h>
 #include <clang/Sema/Sema.h>
+#include <clang/Sema/SemaConsumer.h>
