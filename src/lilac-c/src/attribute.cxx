@@ -15,111 +15,55 @@
  */
 
 #include "lilac-c/pch.h"
-#include "lilac-c/attribute.h"
 
-#include <stack>
-#include <sstream>
+#include <lilac-shared/annotation.h>
 
-using namespace clang;
-
-std::string lilac::c::Attributes::GetFullName(NamedDecl* decl)
-{
-    std::stack<std::string> stk;
-    do
-        stk.emplace(decl->getName());
-    while ((decl = clang::dyn_cast<NamedDecl>(decl->getDeclContext())));
-
-    std::stringstream ss;
-    for (; !stk.empty(); stk.pop())
-        ss << '/' << stk.top();
-
-    return ss.str();
-}
-
-void lilac::c::Attributes::Annotate(NamedDecl* namedDecl, const ParsedAttr& Attr)
-{
-    if (clang::dyn_cast<TypeDecl>(namedDecl))
-    {
-        const auto annotation = AnnotateTypeAttr::Create(
-            namedDecl->getASTContext(),
-            NS + GetFullName(namedDecl),
-            nullptr, 0,
-            Attr.getRange());
-
-        namedDecl->addAttr(annotation);
-
-        return;
-    }
-
-    AnnotateAttr* annotation;
-
-    if (clang::dyn_cast<ParmVarDecl>(namedDecl))
-    {
-        annotation = AnnotateAttr::Create(
-            namedDecl->getASTContext(),
-            NS + namedDecl->getNameAsString(),
-            nullptr, 0,
-            Attr.getRange());
-    }
-    else
-    {
-        annotation = AnnotateAttr::Create(
-            namedDecl->getASTContext(),
-            NS + GetFullName(namedDecl),
-            nullptr, 0,
-            Attr.getRange());
-    }
-
-    namedDecl->addAttr(annotation);
-}
-
-namespace
-{
-    class ExportAttrInfo final : public ParsedAttrInfo
-    {
-    public:
-        ExportAttrInfo()
-        {
+namespace {
+    class ExportAttrInfo final : public clang::ParsedAttrInfo {
+      public:
+        ExportAttrInfo() {
             // NOTE: `S` should be `static` (experimental proof on Clang/LLVM 20.0)
-            static constexpr Spelling S[] = {
-                { ParsedAttr::AS_GNU, "lilac_export" },
-                { ParsedAttr::AS_C23, "lilac::export" },
-                { ParsedAttr::AS_CXX11, "lilac::export" }
-            };
+            static constexpr std::array<Spelling, 3> S = {{
+                {
+                    .Syntax = clang::ParsedAttr::AS_GNU,
+                    .NormalizedFullName = "lilac_export",
+                },
+                {
+                    .Syntax = clang::ParsedAttr::AS_C23,
+                    .NormalizedFullName = "lilac::export",
+                },
+                {
+                    .Syntax = clang::ParsedAttr::AS_CXX11,
+                    .NormalizedFullName = "lilac::export",
+                },
+            }};
             Spellings = S;
         }
 
-        bool diagAppertainsToDecl(Sema& S, const ParsedAttr& Attr, const Decl* D) const override
-        {
-            return clang::dyn_cast<RecordDecl>(D) || clang::dyn_cast<FunctionDecl>(D);
+        auto diagAppertainsToDecl(clang::Sema & /**/, const clang::ParsedAttr & /**/, const clang::Decl *D) const -> bool override {
+            return clang::dyn_cast<clang::RecordDecl>(D) || clang::dyn_cast<clang::FunctionDecl>(D);
         }
 
-        bool diagAppertainsToStmt(Sema&, const ParsedAttr&, const Stmt*) const override
-        {
+        auto diagAppertainsToStmt(clang::Sema & /**/, const clang::ParsedAttr & /**/, const clang::Stmt * /**/) const -> bool override {
             return false;
         }
 
-        AttrHandling handleDeclAttribute(Sema& S, Decl* D, const ParsedAttr& Attr) const override
-        {
-            if (const auto record = clang::dyn_cast<RecordDecl>(D))
-                lilac::c::Attributes::Annotate(record, Attr);
-            else if (const auto fn = clang::dyn_cast<FunctionDecl>(D))
-            {
-                lilac::c::Attributes::Annotate(fn, Attr);
-                for (const auto parameter : fn->parameters())
-                    lilac::c::Attributes::Annotate(parameter, Attr);
-            }
-            else
-            {
+        auto handleDeclAttribute(clang::Sema &S, clang::Decl *D, const clang::ParsedAttr &/**/) const -> AttrHandling override {
+            if (const auto record = clang::dyn_cast<clang::RecordDecl>(D)) {
+                lilac::shared::MarkAsTarget(record);
+            } else if (const auto fn = clang::dyn_cast<clang::FunctionDecl>(D)) {
+                lilac::shared::MarkAsTarget(fn);
+            } else {
                 const auto id = S.Diags.getCustomDiagID(
-                    DiagnosticsEngine::Warning,
+                    clang::DiagnosticsEngine::Warning,
                     "%0 '%1' can not be exported; Only record and function can be exported.");
 
                 std::string name;
-                if (const auto named = clang::dyn_cast<NamedDecl>(D))
+                if (const auto named = clang::dyn_cast<clang::NamedDecl>(D)) {
                     name = named->getName();
-                else
+                } else {
                     name = std::to_string(D->getID());
+                }
 
                 S.Diag(D->getLocation(), id) << D->getDeclKindName() << name;
 
@@ -129,7 +73,10 @@ namespace
             return AttributeApplied;
         }
     };
-}
+} // namespace
 
-[[maybe_unused]]
-static ParsedAttrInfoRegistry::Add<ExportAttrInfo> Y("lilac","");
+namespace {
+    [[maybe_unused]]
+    //NOLINTNEXTLINE(cert-err58-cpp) : Initialization of 'Y' with static storage duration may throw an exception that cannot be caught
+    const clang::ParsedAttrInfoRegistry::Add<ExportAttrInfo> Y("lilac", "");
+}
