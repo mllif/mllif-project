@@ -74,7 +74,12 @@ auto lilac::ir::RawFunctionAnnotation::CreateVector(llvm::Module &module) -> std
     return annotations;
 }
 
-auto lilac::ir::ParameterAnnotation::ParseCallInst(llvm::Module &module, llvm::Function *fn, llvm::CallInst *call) -> std::optional<std::pair<std::string, std::string>> {
+auto lilac::ir::ParameterAnnotation::ParseCallInst(
+    llvm::Module &module,
+// ReSharper disable once CppParameterMayBeConstPtrOrRef
+    llvm::Function *fn,
+// ReSharper disable once CppParameterMayBeConstPtrOrRef
+    llvm::CallInst *call) -> std::optional<std::pair<std::string, std::string>> {
     const auto callee = call->getCalledFunction();
     if (!callee->isIntrinsic() ||
         !callee->getName().starts_with("llvm.var.annotation")) {
@@ -151,10 +156,10 @@ auto lilac::ir::ParameterAnnotation::Create(llvm::Module &module, llvm::Function
 
             if (auto [key, value] = pair.value(); key == shared::TYPE) {
                 type = value;
-                ret |= 1;
+                ret |= 1U;
             } else if (key == shared::NAME) {
                 name = value;
-                ret |= 2;
+                ret |= 2U;
             } else {
                 llvm::errs()
                     << "warn: unrecognized annotation key '"
@@ -189,9 +194,7 @@ auto lilac::ir::FunctionAnnotation::Create(llvm::Function *function, const std::
             continue;
         }
 
-        auto [key, value] = parsed.value();
-
-        if (key == shared::NAMESPACE) {
+        if (auto [key, value] = parsed.value(); key == shared::NAMESPACE) {
             ns = value;
             ret |= 1U;
         } else if (key == shared::NAME) {

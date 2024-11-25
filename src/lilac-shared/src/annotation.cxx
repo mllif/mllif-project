@@ -1,13 +1,5 @@
-#include <clang/AST/Decl.h>
-#include <sstream>
-#include <stack>
-#include <utility>
-
+#include "lilac-shared/pch.h"
 #include "lilac-shared/annotation.h"
-
-#include <clang/AST/ASTContext.h>
-#include <clang/AST/Attr.h>
-#include <clang/AST/RecordLayout.h>
 
 namespace {
     auto CreateAnnotation(const std::string &key, const std::string &value) -> std::string {

@@ -16,11 +16,11 @@
 
 #include "lilac-ir/pch.h"
 
-#include <lilac-ir/annotation.h>
+#include "lilac-ir/annotation.h"
 
 class IRCollectPass : public llvm::PassInfoMixin<IRCollectPass> {
   public:
-    auto run(llvm::Module &module, llvm::ModuleAnalysisManager & /**/) -> llvm::PreservedAnalyses;
+    static auto run(llvm::Module &module, llvm::ModuleAnalysisManager & /**/) -> llvm::PreservedAnalyses;
 };
 
 auto IRCollectPass::run(llvm::Module &module, llvm::ModuleAnalysisManager & /**/) -> llvm::PreservedAnalyses {
