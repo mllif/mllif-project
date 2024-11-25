@@ -24,20 +24,20 @@ namespace {
         }
     }
 
-    auto GetNamespace(const clang::NamedDecl *decl) -> std::string {
-        std::stack<std::string> namespaces;
+    auto GetDirectory(const clang::NamedDecl *decl) -> std::string {
+        std::stack<llvm::StringRef> namespaces;
         for (
-            decl = dyn_cast<clang::NamespaceDecl>(decl->getDeclContext());
+            decl = dyn_cast<clang::NamedDecl>(decl->getDeclContext());
             decl;
-            decl = dyn_cast<clang::NamespaceDecl>(decl->getDeclContext())) {
-            if (auto name = decl->getQualifiedNameAsString(); !name.empty()) {
-                namespaces.push(decl->getNameAsString());
+            decl = dyn_cast<clang::NamedDecl>(decl->getDeclContext())) {
+            if (auto name = decl->getName(); !name.empty()) {
+                namespaces.push(name);
             }
         }
 
         std::stringstream ss;
         for (; !namespaces.empty(); namespaces.pop()) {
-            ss << '/' << namespaces.top();
+            ss << '/' << namespaces.top().str();
         }
 
         return ss.str();
@@ -132,7 +132,7 @@ namespace {
         }
 
         return {
-            GetNamespace(decl),
+            GetDirectory(decl),
             decl->getNameAsString(),
             refCnt,
         };
@@ -176,12 +176,12 @@ void lilac::shared::CreateAnnotation(clang::NamedDecl *decl) {
         const auto size = info.Width / BIT_PER_BYTE;
         const auto align = info.Align / BIT_PER_BYTE;
 
-        ApplyAnnotation(decl, ::CreateAnnotation(NAMESPACE, GetNamespace(decl)));
+        ApplyAnnotation(decl, ::CreateAnnotation(NAMESPACE, GetDirectory(decl)));
         ApplyAnnotation(decl, ::CreateAnnotation(NAME, decl->getNameAsString()));
         ApplyAnnotation(decl, ::CreateAnnotation(SIZE, std::to_string(size)));
         ApplyAnnotation(decl, ::CreateAnnotation(ALIGN, std::to_string(align)));
     } else if (const auto funcDecl = dyn_cast<clang::FunctionDecl>(decl)) {
-        ApplyAnnotation(decl, ::CreateAnnotation(NAMESPACE, GetNamespace(decl)));
+        ApplyAnnotation(decl, ::CreateAnnotation(NAMESPACE, GetDirectory(decl)));
         ApplyAnnotation(decl, ::CreateAnnotation(NAME, decl->getNameAsString()));
         ApplyAnnotation(decl, ::CreateAnnotation(CALLCONV, GetCallConv(funcDecl)));
         ApplyAnnotation(decl, ::CreateAnnotation(RETURN, GetTypeID(funcDecl->getReturnType().getTypePtr()).str()));
@@ -192,11 +192,11 @@ void lilac::shared::CreateAnnotation(clang::NamedDecl *decl) {
 }
 
 auto lilac::shared::ParseAnnotation(const std::string &annotation) -> std::optional<std::pair<std::string, std::string>> {
-    if (!annotation.starts_with(Namespace)) {
+    if (!annotation.starts_with(Namespace) || annotation == Namespace) {
         return std::nullopt;
     }
 
-    const auto line = annotation.substr(Namespace.size() + 1);
+    const auto line = annotation.substr(Namespace.size());
     const auto delimiter = line.find('=');
 
     return std::make_pair(line.substr(0, delimiter), line.substr(delimiter + 1));
