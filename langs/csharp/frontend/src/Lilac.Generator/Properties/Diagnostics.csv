@@ -1,2 +1,0 @@
-id,category,severity,title,format
-LA1001,Lilac.Usage,Error,Type should be exported to export its member,Type {0} should be exported to export its member {1}
