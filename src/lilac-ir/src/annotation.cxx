@@ -49,6 +49,7 @@ auto lilac::ir::RawFunctionAnnotation::Create(llvm::Module &module, const llvm::
 
     return RawFunctionAnnotation{fn, initializer->getAsCString()};
 }
+
 auto lilac::ir::RawFunctionAnnotation::CreateVector(llvm::Module &module) -> std::vector<RawFunctionAnnotation> {
     std::vector<RawFunctionAnnotation> annotations;
 
@@ -72,6 +73,7 @@ auto lilac::ir::RawFunctionAnnotation::CreateVector(llvm::Module &module) -> std
 
     return annotations;
 }
+
 auto lilac::ir::ParameterAnnotation::ParseCallInst(llvm::Module &module, llvm::Function *fn, llvm::CallInst *call) -> std::optional<std::pair<std::string, std::string>> {
     const auto callee = call->getCalledFunction();
     if (!callee->isIntrinsic() ||
@@ -129,13 +131,14 @@ auto lilac::ir::ParameterAnnotation::ParseCallInst(llvm::Module &module, llvm::F
     const std::string annotation(initializer->getAsCString());
     return shared::ParseAnnotation(annotation);
 }
+
 auto lilac::ir::ParameterAnnotation::Create(llvm::Module &module, llvm::Function *fn) -> std::optional<ParameterAnnotation> {
     auto ret = 0U;
 
     // NOLINTNEXTLINE(*-const-correctness)
     std::string type, name;
-    for (auto& block : *fn) {
-        for (auto& inst : block) {
+    for (auto &block : *fn) {
+        for (auto &inst : block) {
             const auto call = dyn_cast<llvm::CallInst>(&inst);
             if (!call) {
                 continue;
@@ -175,6 +178,7 @@ auto lilac::ir::ParameterAnnotation::Create(llvm::Module &module, llvm::Function
 
     return ParameterAnnotation{type, name};
 }
+
 auto lilac::ir::FunctionAnnotation::Create(llvm::Function *function, const std::vector<llvm::StringRef> &annotations) -> std::optional<FunctionAnnotation> {
     auto ret = 0U;
 
@@ -227,6 +231,7 @@ auto lilac::ir::FunctionAnnotation::Create(llvm::Function *function, const std::
 
     return FunctionAnnotation{function, ns, name, callconv, retT};
 }
+
 auto lilac::ir::FunctionAnnotation::CreateVector(const std::vector<RawFunctionAnnotation> &annotations) -> std::vector<FunctionAnnotation> {
 
     std::map<llvm::Function *, std::vector<llvm::StringRef>> map;

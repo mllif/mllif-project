@@ -18,9 +18,6 @@
 
 #include <lilac-ir/annotation.h>
 
-constexpr std::string NS = "__lilac__";
-
-
 class IRCollectPass : public llvm::PassInfoMixin<IRCollectPass> {
   public:
     auto run(llvm::Module &module, llvm::ModuleAnalysisManager & /**/) -> llvm::PreservedAnalyses;
@@ -28,14 +25,14 @@ class IRCollectPass : public llvm::PassInfoMixin<IRCollectPass> {
 
 auto IRCollectPass::run(llvm::Module &module, llvm::ModuleAnalysisManager & /**/) -> llvm::PreservedAnalyses {
 
-    auto rawAnnotations = lilac::ir::RawFunctionAnnotation::CreateVector(module);
-    auto annotations = lilac::ir::FunctionAnnotation::CreateVector(rawAnnotations);
+    const auto rawAnnotations = lilac::ir::RawFunctionAnnotation::CreateVector(module);
+    const auto annotations = lilac::ir::FunctionAnnotation::CreateVector(rawAnnotations);
 
-    for (const auto& raw : rawAnnotations) {
+    for (const auto &raw : rawAnnotations) {
         llvm::outs() << raw.getFunction()->getName() << ' ' << raw.getValue() << '\n';
     }
 
-    for (const auto& annotation : annotations) {
+    for (const auto &annotation : annotations) {
         llvm::outs() << annotation.getNamespace() << '/' << annotation.getName() << '\n';
     }
 
