@@ -1,10 +1,10 @@
-#include "lilac-ir/annotation.h"
+#include "polyglat-ir/annotation.h"
 
-#include <lilac-shared/annotation.h>
+#include <polyglat-shared/annotation.h>
 #include <map>
 #include <utility>
 
-auto lilac::ir::RawFunctionAnnotation::Create(llvm::Module &module, const llvm::ConstantStruct *constantStruct) -> std::optional<RawFunctionAnnotation> {
+auto polyglat::ir::RawFunctionAnnotation::Create(llvm::Module &module, const llvm::ConstantStruct *constantStruct) -> std::optional<RawFunctionAnnotation> {
     const auto fnConstant = constantStruct->getOperand(0);
     if (!fnConstant) {
         return std::nullopt;
@@ -50,7 +50,7 @@ auto lilac::ir::RawFunctionAnnotation::Create(llvm::Module &module, const llvm::
     return RawFunctionAnnotation{fn, initializer->getAsCString()};
 }
 
-auto lilac::ir::RawFunctionAnnotation::CreateVector(llvm::Module &module) -> std::vector<RawFunctionAnnotation> {
+auto polyglat::ir::RawFunctionAnnotation::CreateVector(llvm::Module &module) -> std::vector<RawFunctionAnnotation> {
     std::vector<RawFunctionAnnotation> annotations;
 
     for (const auto &global : module.globals()) {
@@ -74,7 +74,7 @@ auto lilac::ir::RawFunctionAnnotation::CreateVector(llvm::Module &module) -> std
     return annotations;
 }
 
-auto lilac::ir::ParameterAnnotation::ParseCallInst(
+auto polyglat::ir::ParameterAnnotation::ParseCallInst(
     llvm::Module &module,
 // ReSharper disable once CppParameterMayBeConstPtrOrRef
     llvm::Function *fn,
@@ -137,7 +137,7 @@ auto lilac::ir::ParameterAnnotation::ParseCallInst(
     return shared::ParseAnnotation(annotation);
 }
 
-auto lilac::ir::ParameterAnnotation::Create(llvm::Module &module, llvm::Function *fn) -> std::optional<ParameterAnnotation> {
+auto polyglat::ir::ParameterAnnotation::Create(llvm::Module &module, llvm::Function *fn) -> std::optional<ParameterAnnotation> {
     auto ret = 0U;
 
     // NOLINTNEXTLINE(*-const-correctness)
@@ -184,7 +184,7 @@ auto lilac::ir::ParameterAnnotation::Create(llvm::Module &module, llvm::Function
     return ParameterAnnotation{type, name};
 }
 
-auto lilac::ir::FunctionAnnotation::Create(llvm::Function *function, const std::vector<llvm::StringRef> &annotations) -> std::optional<FunctionAnnotation> {
+auto polyglat::ir::FunctionAnnotation::Create(llvm::Function *function, const std::vector<llvm::StringRef> &annotations) -> std::optional<FunctionAnnotation> {
     auto ret = 0U;
 
     std::string ns, name, callconv, retT;
@@ -235,7 +235,7 @@ auto lilac::ir::FunctionAnnotation::Create(llvm::Function *function, const std::
     return FunctionAnnotation{function, ns, name, callconv, retT};
 }
 
-auto lilac::ir::FunctionAnnotation::CreateVector(const std::vector<RawFunctionAnnotation> &annotations) -> std::vector<FunctionAnnotation> {
+auto polyglat::ir::FunctionAnnotation::CreateVector(const std::vector<RawFunctionAnnotation> &annotations) -> std::vector<FunctionAnnotation> {
 
     std::map<llvm::Function *, std::vector<llvm::StringRef>> map;
     for (auto annotation : annotations) {

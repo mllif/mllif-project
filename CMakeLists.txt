@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.26)
-project(lilac)
+project(polyglat)
 
 set(ENABLE_LLVM_SHARED ON)
 

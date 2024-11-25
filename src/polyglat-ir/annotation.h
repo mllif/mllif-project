@@ -1,7 +1,7 @@
 #pragma once
-#include <lilac-shared/annotation.h>
+#include <polyglat-shared/annotation.h>
 
-namespace lilac::ir {
+namespace polyglat::ir {
 
     class RawFunctionAnnotation {
         llvm::Function *Function;
@@ -62,4 +62,4 @@ namespace lilac::ir {
         [[nodiscard]] auto getReturnType() const -> const std::string & { return Return; }
         [[nodiscard]] auto getParameters() const -> const std::vector<ParameterAnnotation> & { return Parameters; }
     };
-} // namespace lilac::ir
+} // namespace polyglat::ir

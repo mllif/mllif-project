@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#include "lilac-ir/pch.h"
+#include "polyglat-ir/pch.h"
 
-#include "lilac-ir/annotation.h"
+#include "polyglat-ir/annotation.h"
 
 class IRCollectPass : public llvm::PassInfoMixin<IRCollectPass> {
   public:
@@ -25,8 +25,8 @@ class IRCollectPass : public llvm::PassInfoMixin<IRCollectPass> {
 
 auto IRCollectPass::run(llvm::Module &module, llvm::ModuleAnalysisManager & /**/) -> llvm::PreservedAnalyses {
 
-    const auto rawAnnotations = lilac::ir::RawFunctionAnnotation::CreateVector(module);
-    const auto annotations = lilac::ir::FunctionAnnotation::CreateVector(rawAnnotations);
+    const auto rawAnnotations = polyglat::ir::RawFunctionAnnotation::CreateVector(module);
+    const auto annotations = polyglat::ir::FunctionAnnotation::CreateVector(rawAnnotations);
 
     for (const auto &raw : rawAnnotations) {
         llvm::outs() << raw.getFunction()->getName() << ' ' << raw.getValue() << '\n';

@@ -1,15 +1,15 @@
 
 namespace TestNS
 {
-    struct [[lilac::export]] TestStruct {
+    struct [[polyglat::export]] TestStruct {
         int A;
         int B;
         float C[100];
 
-        [[lilac::export]] TestStruct TestFn();
+        [[polyglat::export]] TestStruct TestFn();
     };
 
-    struct [[lilac::export]] TestStruct2 {
+    struct [[polyglat::export]] TestStruct2 {
         int A;
         int B;
         float C[100];

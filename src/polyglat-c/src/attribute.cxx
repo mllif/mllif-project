@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#include "lilac-c/pch.h"
+#include "polyglat-c/pch.h"
 
-#include <lilac-shared/annotation.h>
+#include <polyglat-shared/annotation.h>
 
 namespace {
     class ExportAttrInfo final : public clang::ParsedAttrInfo {
@@ -26,15 +26,15 @@ namespace {
             static constexpr std::array<Spelling, 3> S = {{
                 {
                     .Syntax = clang::ParsedAttr::AS_GNU,
-                    .NormalizedFullName = "lilac_export",
+                    .NormalizedFullName = "polyglat_export",
                 },
                 {
                     .Syntax = clang::ParsedAttr::AS_C23,
-                    .NormalizedFullName = "lilac::export",
+                    .NormalizedFullName = "polyglat::export",
                 },
                 {
                     .Syntax = clang::ParsedAttr::AS_CXX11,
-                    .NormalizedFullName = "lilac::export",
+                    .NormalizedFullName = "polyglat::export",
                 },
             }};
             Spellings = S;
@@ -57,9 +57,9 @@ namespace {
              *    default type size(1)/alignment(1) will be returned.
              */
             if (const auto record = clang::dyn_cast<clang::RecordDecl>(D)) {
-                lilac::shared::MarkAsTarget(record); // just mark a symbol to process it later
+                polyglat::shared::MarkAsTarget(record); // just mark a symbol to process it later
             } else if (const auto fn = clang::dyn_cast<clang::FunctionDecl>(D)) {
-                lilac::shared::MarkAsTarget(fn); // just mark a symbol to process it later
+                polyglat::shared::MarkAsTarget(fn); // just mark a symbol to process it later
             } else {
                 const auto id = S.Diags.getCustomDiagID(
                     clang::DiagnosticsEngine::Warning,
@@ -85,5 +85,5 @@ namespace {
 namespace {
     [[maybe_unused]]
     //NOLINTNEXTLINE(cert-err58-cpp) : Initialization of 'Y' with static storage duration may throw an exception that cannot be caught
-    const clang::ParsedAttrInfoRegistry::Add<ExportAttrInfo> Y("lilac", "");
+    const clang::ParsedAttrInfoRegistry::Add<ExportAttrInfo> Y("polyglat", "");
 }

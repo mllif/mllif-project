@@ -1,7 +1,7 @@
 
-#include "lilac-c/pch.h"
+#include "polyglat-c/pch.h"
 
-#include <lilac-shared/annotation.h>
+#include <polyglat-shared/annotation.h>
 
 class TypeInfoEmitter final : public clang::RecursiveASTVisitor<TypeInfoEmitter> {
 
@@ -11,9 +11,9 @@ class TypeInfoEmitter final : public clang::RecursiveASTVisitor<TypeInfoEmitter>
         auto target = false;
         for (const auto attr : decl->attrs()) {
             if (const auto annotationAttr = dyn_cast<clang::AnnotateAttr>(attr)) {
-                target = annotationAttr->getAnnotation().starts_with(lilac::shared::Namespace);
+                target = annotationAttr->getAnnotation().starts_with(polyglat::shared::Namespace);
             } else if (const auto annotationTypeAttr = dyn_cast<clang::AnnotateTypeAttr>(attr)) {
-                target = annotationTypeAttr->getAnnotation().starts_with(lilac::shared::Namespace);
+                target = annotationTypeAttr->getAnnotation().starts_with(polyglat::shared::Namespace);
             }
             if (target) {
                 break;
@@ -28,7 +28,7 @@ class TypeInfoEmitter final : public clang::RecursiveASTVisitor<TypeInfoEmitter>
     // ReSharper disable once CppMemberFunctionMayBeStatic
     auto VisitRecordDecl(clang::RecordDecl *decl) -> bool {
         if (ShouldBeAnnotated(decl)) {
-            lilac::shared::CreateAnnotation(decl);
+            polyglat::shared::CreateAnnotation(decl);
         }
 
         return true;
@@ -56,10 +56,10 @@ class TypeInfoEmitter final : public clang::RecursiveASTVisitor<TypeInfoEmitter>
             return false;
         }
 
-        lilac::shared::CreateAnnotation(decl);
+        polyglat::shared::CreateAnnotation(decl);
 
         for (const auto arg : decl->parameters()) {
-            lilac::shared::CreateAnnotation(arg);
+            polyglat::shared::CreateAnnotation(arg);
         }
 
         return true;
@@ -98,5 +98,5 @@ class TypeInfoEmitAction final : public clang::PluginASTAction {
 namespace {
     [[maybe_unused]]
     // NOLINTNEXTLINE(cert-err58-cpp) : Initialization of 'X' with static storage duration may throw an exception that cannot be caught
-    const clang::FrontendPluginRegistry::Add<TypeInfoEmitAction> X("lilac", "");
+    const clang::FrontendPluginRegistry::Add<TypeInfoEmitAction> X("polyglat", "");
 }

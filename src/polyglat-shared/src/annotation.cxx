@@ -1,10 +1,10 @@
-#include "lilac-shared/pch.h"
-#include "lilac-shared/annotation.h"
+#include "polyglat-shared/pch.h"
+#include "polyglat-shared/annotation.h"
 
 namespace {
     auto CreateAnnotation(const std::string &key, const std::string &value) -> std::string {
         std::stringstream ss;
-        ss << lilac::shared::Namespace << key << '=' << value;
+        ss << polyglat::shared::Namespace << key << '=' << value;
         return ss.str();
     }
 
@@ -156,11 +156,11 @@ namespace {
     }
 } // namespace
 
-void lilac::shared::MarkAsTarget(clang::NamedDecl *decl) {
+void polyglat::shared::MarkAsTarget(clang::NamedDecl *decl) {
     ApplyAnnotation(decl, Namespace);
 }
 
-void lilac::shared::CreateAnnotation(clang::NamedDecl *decl) {
+void polyglat::shared::CreateAnnotation(clang::NamedDecl *decl) {
     if (const auto typeDecl = dyn_cast<clang::TypeDecl>(decl)) {
         constexpr size_t BIT_PER_BYTE = 8;
 
@@ -183,7 +183,7 @@ void lilac::shared::CreateAnnotation(clang::NamedDecl *decl) {
     }
 }
 
-auto lilac::shared::ParseAnnotation(const std::string &annotation) -> std::optional<std::pair<std::string, std::string>> {
+auto polyglat::shared::ParseAnnotation(const std::string &annotation) -> std::optional<std::pair<std::string, std::string>> {
     if (!annotation.starts_with(Namespace) || annotation == Namespace) {
         return std::nullopt;
     }
