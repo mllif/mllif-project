@@ -1,14 +1,23 @@
 
 namespace TestNS
 {
-    struct __attribute__((lilac_export)) TestStruct {
+    struct [[lilac::export]] TestStruct {
         int A;
         int B;
-        float C;
+        float C[100];
+
+        [[lilac::export]] TestStruct TestFn();
     };
 
-    int TestFn(TestStruct *T) __attribute__((lilac_export)) {
-        return T->A + T->B + T->C;
+    struct [[lilac::export]] TestStruct2 {
+        int A;
+        int B;
+        float C[100];
+    };
+
+
+    TestStruct TestStruct::TestFn() {
+        return TestStruct();
     }
 }
 
