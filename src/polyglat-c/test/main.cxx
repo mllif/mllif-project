@@ -4,20 +4,12 @@ namespace TestNS
     struct [[polyglat::export]] TestStruct {
         int A;
         int B;
-        float C[100];
 
-        [[polyglat::export]] TestStruct TestFn();
+        TestStruct(int a, int b) : A(a), B(b) {}
     };
 
-    struct [[polyglat::export]] TestStruct2 {
-        int A;
-        int B;
-        float C[100];
-    };
-
-
-    TestStruct TestStruct::TestFn() {
-        return TestStruct();
+    TestStruct TestFn() {
+        return TestStruct(0, 0);
     }
 }
 
