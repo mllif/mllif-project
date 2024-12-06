@@ -14,41 +14,99 @@
  * limitations under the License.
  */
 
+#include "polyglat-ir/annotation.h"
 #include "polyglat-ir/pch.h"
 
-#include "polyglat-ir/annotation.h"
+#include <iostream>
+#include <llvm/Support/CommandLine.h>
+#include <llvm/Support/Errc.h>
+#include <llvm/Support/FileSystem.h>
 
-class IRCollectPass : public llvm::PassInfoMixin<IRCollectPass> {
+namespace {
+    // NOLINTNEXTLINE(cert-err58-cpp, cppcoreguidelines-avoid-non-const-global-variables)
+    llvm::cl::OptionCategory Category("Polyglat Options", "Configure the Polyglat system");
+
+    [[maybe_unused]]
+    // NOLINTNEXTLINE(cert-err58-cpp)
+    const llvm::cl::opt<std::string> OutputFilePath(
+        "polyglat-output",
+        llvm::cl::desc("Place polyglat symbols into <file>"),
+        llvm::cl::value_desc("file"),
+        llvm::cl::cat(Category),
+        llvm::cl::Required,
+        llvm::cl::ValueRequired);
+} // namespace
+
+// NOLINTNEXTLINE(cppcoreguidelines-special-member-functions, hicpp-special-member-functions)
+class PolyglatPass final : public llvm::PassInfoMixin<PolyglatPass> {
+    std::vector<polyglat::ir::FunctionAnnotation> Annotations;
+
   public:
-    static auto run(llvm::Module &module, llvm::ModuleAnalysisManager & /**/) -> llvm::PreservedAnalyses;
+    auto run(llvm::Module &module, llvm::ModuleAnalysisManager & /**/) -> llvm::PreservedAnalyses;
+
+    ~PolyglatPass();
 };
 
-auto IRCollectPass::run(llvm::Module &module, llvm::ModuleAnalysisManager & /**/) -> llvm::PreservedAnalyses {
-
+auto PolyglatPass::run(llvm::Module &module, llvm::ModuleAnalysisManager & /**/) -> llvm::PreservedAnalyses {
     const auto rawAnnotations = polyglat::ir::RawFunctionAnnotation::CreateVector(module);
-    const auto annotations = polyglat::ir::FunctionAnnotation::CreateVector(rawAnnotations);
+    Annotations = polyglat::ir::FunctionAnnotation::CreateVector(rawAnnotations);
 
-    for (const auto &raw : rawAnnotations) {
-        llvm::outs() << raw.getFunction()->getName() << ' ' << raw.getValue() << '\n';
-    }
-
-    for (const auto &annotation : annotations) {
-        llvm::outs() << annotation.getNamespace() << '/' << annotation.getName() << '\n';
+    if (Annotations.empty()) {
     }
 
     return llvm::PreservedAnalyses::all();
 }
 
+static constexpr auto Success = static_cast<std::errc>(0);
+
+PolyglatPass::~PolyglatPass() {
+    if (OutputFilePath.empty()) {
+        llvm::report_fatal_error("Output file path of polyglat cannot be empty. Did you specified '--polyglat-output'?", false);
+        // return
+    }
+
+    std::error_code err;
+    llvm::raw_fd_ostream os(
+        OutputFilePath.getValue(),
+        err,
+        llvm::sys::fs::CD_CreateAlways,
+        llvm::sys::fs::FA_Write,
+        llvm::sys::fs::OF_None);
+    llvm::outs() << "hello\n";
+    if (err != Success) {
+        report_fatal_error(llvm::StringRef(err.message()), false);
+        // return
+    }
+
+    for (const auto &annotation : Annotations) {
+        os << annotation.getNamespace() << '/' << annotation.getName() << '\n';
+    }
+}
+
 extern "C" auto LLVM_ATTRIBUTE_WEAK llvmGetPassPluginInfo() -> llvm::PassPluginLibraryInfo {
+    std::cerr << "Polyglat IR collector plugin\n";
     return llvm::PassPluginLibraryInfo{
         .APIVersion = LLVM_PLUGIN_API_VERSION,
-        .PluginName = "LILAC_IR_COLLECTOR",
+        .PluginName = "polyglat",
         .PluginVersion = __TIME__,
-        .RegisterPassBuilderCallbacks = [](llvm::PassBuilder &builder) {
-            builder.registerPipelineStartEPCallback(
-                [](llvm::ModulePassManager &manager, llvm::OptimizationLevel) {
-                    manager.addPass(IRCollectPass());
-                    return true;
+        .RegisterPassBuilderCallbacks = [](llvm::PassBuilder &PB) {
+            std::cerr << "Polyglat IR collector plugin 222\n";
+
+            // #1 REGISTRATION FOR "opt -passes=print<opcode-counter>"
+            PB.registerPipelineParsingCallback(
+                [&](const llvm::StringRef Name, llvm::ModulePassManager &MAM, llvm::ArrayRef<llvm::PassBuilder::PipelineElement>) {
+                    if (Name == "polyglat") {
+                        MAM.addPass(PolyglatPass());
+                        return true;
+                    }
+                    return false;
                 });
+
+            /*
+            // #2 REGISTRATION FOR "FAM.getResult<IRCollectPass>(Func)"
+            PB.registerAnalysisRegistrationCallback([](llvm::ModuleAnalysisManager &MAM) {
+                MAM.registerPass([&] { return PolyglatPass(); });
+            });
+            */
         }};
 }
