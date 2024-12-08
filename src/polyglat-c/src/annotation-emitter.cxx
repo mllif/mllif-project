@@ -59,14 +59,19 @@ auto polyglat::c::AnnotationEmitter::VisitFunctionDecl(clang::FunctionDecl *decl
     return true;
 }
 
-void polyglat::c::ASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
-    AnnotationEmitter emitter{Sema};
-    emitter.TraverseDecl(Ctx.getTranslationUnitDecl());
-}
+class ASTConsumer final : public clang::SemaConsumer {
+    clang::Sema *Sema = nullptr;
 
-void polyglat::c::ASTConsumer::InitializeSema(clang::Sema &S) {
-    Sema = &S;
-}
+public:
+    void HandleTranslationUnit(clang::ASTContext &ctx) override {
+        polyglat::c::AnnotationEmitter emitter{Sema};
+        emitter.TraverseDecl(ctx.getTranslationUnitDecl());
+    }
+
+    void InitializeSema(clang::Sema &sema) override {
+        Sema = &sema;
+    }
+};
 
 auto polyglat::c::AnnotationEmitAction::CreateASTConsumer(clang::CompilerInstance & /**/, llvm::StringRef /**/) -> std::unique_ptr<clang::ASTConsumer> {
     return std::make_unique<ASTConsumer>();
