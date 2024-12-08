@@ -18,5 +18,6 @@
 
 #include <llvm/IR/Module.h>
 #include <llvm/IR/PassManager.h>
+#include <llvm/IR/DiagnosticPrinter.h>
 #include <llvm/Passes/PassPlugin.h>
 #include <llvm/Passes/PassBuilder.h>

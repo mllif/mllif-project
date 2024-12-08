@@ -48,8 +48,8 @@ class PolyglatPass final : public llvm::PassInfoMixin<PolyglatPass> {
 };
 
 auto PolyglatPass::run(llvm::Module &module, llvm::ModuleAnalysisManager & /**/) -> llvm::PreservedAnalyses {
-    const auto rawAnnotations = polyglat::ir::RawFunctionAnnotation::CreateVector(module);
-    Annotations = polyglat::ir::FunctionAnnotation::CreateVector(rawAnnotations);
+    const auto rawAnnotations = polyglat::ir::RawFunctionAnnotation::CreateVector(module.getContext(), module);
+    Annotations = polyglat::ir::FunctionAnnotation::CreateVector(module.getContext(), rawAnnotations);
 
     if (Annotations.empty()) {
     }
@@ -72,7 +72,6 @@ PolyglatPass::~PolyglatPass() {
         llvm::sys::fs::CD_CreateAlways,
         llvm::sys::fs::FA_Write,
         llvm::sys::fs::OF_None);
-    llvm::outs() << "hello\n";
     if (err != Success) {
         report_fatal_error(llvm::StringRef(err.message()), false);
         // return

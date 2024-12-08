@@ -1,56 +1,43 @@
 #include "polyglat-ir/annotation.h"
 
-#include <polyglat-shared/annotation.h>
 #include <map>
+#include <polyglat-ir/diagnostics.h>
+#include <polyglat-shared/annotation.h>
 #include <utility>
 
-auto polyglat::ir::RawFunctionAnnotation::Create(llvm::Module &module, const llvm::ConstantStruct *constantStruct) -> std::optional<RawFunctionAnnotation> {
+auto polyglat::ir::RawFunctionAnnotation::Create(llvm::LLVMContext &context, llvm::Module &module, const llvm::ConstantStruct *constantStruct) -> std::optional<RawFunctionAnnotation> {
     const auto fnConstant = constantStruct->getOperand(0);
     if (!fnConstant) {
         return std::nullopt;
     }
     const auto fn = module.getFunction(fnConstant->getName());
     if (!fn) {
-        llvm::errs()
-            << "warn: no function matched for annotation '"
-            << fnConstant->getName() << "'\n";
+        context.diagnose(NoSuchFunctionError(fnConstant->getName().str()));
         return std::nullopt;
     }
 
     const auto annotationConstant = constantStruct->getOperand(1);
     if (!annotationConstant) {
-        llvm::errs()
-            << "warn: value missing for annotation of function '"
-            << fn->getName() << "'\n";
+        context.diagnose(ValueRequiredError("annotation of function", fn->getName().str()));
         return std::nullopt;
     }
 
     const auto annotationVar = module.getGlobalVariable(annotationConstant->getName(), true);
     if (!annotationVar) {
-        llvm::errs()
-            << "warn: global variable missing for annotation of function '"
-            << fn->getName() << "'\n";
+        context.diagnose(NoSuchGlobalVariableError(annotationConstant->getName().str()));
         return std::nullopt;
     }
 
     const auto initializer = dyn_cast<llvm::ConstantDataArray>(annotationVar->getInitializer());
-    if (!initializer) {
-        llvm::errs()
-            << "warn: initializer missing for annotation variable of function '"
-            << fn->getName() << "'\n";
-        return std::nullopt;
-    }
-    if (!initializer->isCString()) {
-        llvm::errs()
-            << "warn: initializer for annotation variable of function '"
-            << fn->getName() << "' is not a string\n";
+    if (!initializer || !initializer->isCString()) {
+        context.diagnose(InvalidInitializerError("annotation variable of function", fn->getName().str()));
         return std::nullopt;
     }
 
     return RawFunctionAnnotation{fn, initializer->getAsCString()};
 }
 
-auto polyglat::ir::RawFunctionAnnotation::CreateVector(llvm::Module &module) -> std::vector<RawFunctionAnnotation> {
+auto polyglat::ir::RawFunctionAnnotation::CreateVector(llvm::LLVMContext &context, llvm::Module &module) -> std::vector<RawFunctionAnnotation> {
     std::vector<RawFunctionAnnotation> annotations;
 
     for (const auto &global : module.globals()) {
@@ -65,7 +52,7 @@ auto polyglat::ir::RawFunctionAnnotation::CreateVector(llvm::Module &module) -> 
 
         for (const auto &operand : array->operands()) {
             const auto constantStruct = dyn_cast<llvm::ConstantStruct>(operand.get());
-            if (auto annotation = Create(module, constantStruct)) {
+            if (auto annotation = Create(context, module, constantStruct)) {
                 annotations.push_back(annotation.value());
             }
         }
@@ -75,6 +62,7 @@ auto polyglat::ir::RawFunctionAnnotation::CreateVector(llvm::Module &module) -> 
 }
 
 auto polyglat::ir::ParameterAnnotation::ParseCallInst(
+    llvm::LLVMContext &context,
     llvm::Module &module,
 // ReSharper disable once CppParameterMayBeConstPtrOrRef
     llvm::Function *fn,
@@ -95,41 +83,22 @@ auto polyglat::ir::ParameterAnnotation::ParseCallInst(
         }
     }
     if (argIndex == callee->arg_size()) {
-        llvm::errs()
-            << "warn: annotated parameter '"
-            << argName
-            << "' not exists in function '"
-            << fn->getName()
-            << "'\n";
+        context.diagnose(NoSuchParameterError(argName.str(), "function", fn->getName().str()));
         return std::nullopt;
     }
 
     const auto annotationVarName = call->getOperand(1)->getName();
     const auto annotationVar = module.getGlobalVariable(annotationVarName, true);
     if (!annotationVar) {
-        llvm::errs()
-            << "warn: global variable missing for annotation of parameter '"
-            << argName
-            << "' of function '"
-            << fn->getName() << "'\n";
+        context.diagnose(NoSuchGlobalVariableError(annotationVarName.str()));
         return std::nullopt;
     }
 
     const auto initializer = dyn_cast<llvm::ConstantDataArray>(annotationVar->getInitializer());
-    if (!initializer) {
-        llvm::errs()
-            << "warn: initializer missing for annotation variable of parameter '"
-            << argName
-            << "' of function '"
-            << fn->getName() << "'\n";
-        return std::nullopt;
-    }
-    if (!initializer->isCString()) {
-        llvm::errs()
-            << "warn: initializer for annotation variable of parameter '"
-            << argName
-            << "' of function '"
-            << fn->getName() << "' is not a string\n";
+    if (!initializer || !initializer->isCString()) {
+        context.diagnose(InvalidInitializerError(
+            "annotation variable of parameter",
+            std::format("{}' of function '{}", argName.str(), fn->getName().str())));
         return std::nullopt;
     }
 
@@ -137,7 +106,7 @@ auto polyglat::ir::ParameterAnnotation::ParseCallInst(
     return shared::ParseAnnotation(annotation);
 }
 
-auto polyglat::ir::ParameterAnnotation::Create(llvm::Module &module, llvm::Function *fn) -> std::optional<ParameterAnnotation> {
+auto polyglat::ir::ParameterAnnotation::Create(llvm::LLVMContext &context, llvm::Module &module, llvm::Function *fn) -> std::optional<ParameterAnnotation> {
     auto ret = 0U;
 
     // NOLINTNEXTLINE(*-const-correctness)
@@ -149,7 +118,7 @@ auto polyglat::ir::ParameterAnnotation::Create(llvm::Module &module, llvm::Funct
                 continue;
             }
 
-            const auto pair = ParseCallInst(module, fn, call);
+            const auto pair = ParseCallInst(context, module, fn, call);
             if (!pair) {
                 continue;
             }
@@ -161,21 +130,16 @@ auto polyglat::ir::ParameterAnnotation::Create(llvm::Module &module, llvm::Funct
                 name = value;
                 ret |= 2U;
             } else {
-                llvm::errs()
-                    << "warn: unrecognized annotation key '"
-                    << key
-                    << "' of a parameter of function '"
-                    << fn->getName()
-                    << "' will be ignored.\n";
+                context.diagnose(UnrecognizedAttributeError(key, "of a parameter of function", fn->getName().str()));
             }
         }
     }
 
     if ((ret & 1U) == 0) {
-        llvm::errs() << "warn: type missing for a parameter of function '" << fn->getName() << "'\n";
+        context.diagnose(TypeRequiredError("a parameter of function", fn->getName().str()));
     }
     if ((ret & 2U) == 0) {
-        llvm::errs() << "warn: name missing for a parameter of function '" << fn->getName() << "'\n";
+        context.diagnose(NameRequiredError("a parameter of function", fn->getName().str()));
     }
     if (ret != 3) {
         return std::nullopt;
@@ -184,7 +148,7 @@ auto polyglat::ir::ParameterAnnotation::Create(llvm::Module &module, llvm::Funct
     return ParameterAnnotation{type, name};
 }
 
-auto polyglat::ir::FunctionAnnotation::Create(llvm::Function *function, const std::vector<llvm::StringRef> &annotations) -> std::optional<FunctionAnnotation> {
+auto polyglat::ir::FunctionAnnotation::Create(llvm::LLVMContext &context, llvm::Function *fn, const std::vector<llvm::StringRef> &annotations) -> std::optional<FunctionAnnotation> {
     auto ret = 0U;
 
     std::string ns, name, callconv, retT;
@@ -207,35 +171,30 @@ auto polyglat::ir::FunctionAnnotation::Create(llvm::Function *function, const st
             retT = value;
             ret |= 1U << 3U;
         } else {
-            llvm::errs()
-                << "warn: unrecognized annotation key '"
-                << key
-                << "' for function '"
-                << function->getName()
-                << "' will be ignored.\n";
+            context.diagnose(UnrecognizedAttributeError(key, "of a parameter of function", fn->getName().str()));
         }
     }
 
     if ((ret & 1U) == 0) {
-        llvm::errs() << "warn: namespace missing for function '" << function->getName() << "'\n";
+        context.diagnose(NamespaceRequiredError("function", fn->getName().str()));
     }
     if ((ret & 1U << 1U) == 0) {
-        llvm::errs() << "warn: name missing for function '" << function->getName() << "'\n";
+        context.diagnose(NameRequiredError("function", fn->getName().str()));
     }
     if ((ret & 1U << 2U) == 0) {
-        llvm::errs() << "warn: callconv missing for function '" << function->getName() << "'\n";
+        context.diagnose(CallConvRequiredError("function", fn->getName().str()));
     }
     if ((ret & 1U << 3U) == 0) {
-        llvm::errs() << "warn: return type missing for function '" << function->getName() << "'\n";
+        context.diagnose(ReturnTypeRequiredError("function", fn->getName().str()));
     }
     if (constexpr unsigned ALL = 0b1111; ret != ALL) {
         return std::nullopt;
     }
 
-    return FunctionAnnotation{function, ns, name, callconv, retT};
+    return FunctionAnnotation{fn, ns, name, callconv, retT};
 }
 
-auto polyglat::ir::FunctionAnnotation::CreateVector(const std::vector<RawFunctionAnnotation> &annotations) -> std::vector<FunctionAnnotation> {
+auto polyglat::ir::FunctionAnnotation::CreateVector(llvm::LLVMContext &context, const std::vector<RawFunctionAnnotation> &annotations) -> std::vector<FunctionAnnotation> {
 
     std::map<llvm::Function *, std::vector<llvm::StringRef>> map;
     for (auto annotation : annotations) {
@@ -244,7 +203,7 @@ auto polyglat::ir::FunctionAnnotation::CreateVector(const std::vector<RawFunctio
 
     std::vector<FunctionAnnotation> ret;
     for (const auto &[fn, annotations] : map) {
-        if (auto annotation = Create(fn, annotations)) {
+        if (auto annotation = Create(context, fn, annotations)) {
             ret.push_back(annotation.value());
         }
     }

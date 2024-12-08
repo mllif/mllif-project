@@ -10,9 +10,9 @@ namespace polyglat::ir {
         RawFunctionAnnotation(llvm::Function *function, const llvm::StringRef value) : Function(function), Value(value) {}
 
       public:
-        static auto Create(llvm::Module &module, const llvm::ConstantStruct *constantStruct) -> std::optional<RawFunctionAnnotation>;
+        static auto Create(llvm::LLVMContext &context, llvm::Module &module, const llvm::ConstantStruct *constantStruct) -> std::optional<RawFunctionAnnotation>;
 
-        static auto CreateVector(llvm::Module &module) -> std::vector<RawFunctionAnnotation>;
+        static auto CreateVector(llvm::LLVMContext &context, llvm::Module &module) -> std::vector<RawFunctionAnnotation>;
 
         [[nodiscard]] auto getFunction() const -> llvm::Function * { return Function; }
         [[nodiscard]] auto getValue() const -> llvm::StringRef { return Value; }
@@ -24,10 +24,10 @@ namespace polyglat::ir {
 
         ParameterAnnotation(std::string type, std::string name) : Type(std::move(type)), Name(std::move(name)) {}
 
-        static auto ParseCallInst(llvm::Module &module, llvm::Function *fn, llvm::CallInst *call) -> std::optional<std::pair<std::string, std::string>>;
+        static auto ParseCallInst(llvm::LLVMContext &context, llvm::Module &module, llvm::Function *fn, llvm::CallInst *call) -> std::optional<std::pair<std::string, std::string>>;
 
       public:
-        static auto Create(llvm::Module &module, llvm::Function *fn) -> std::optional<ParameterAnnotation>;
+        static auto Create(llvm::LLVMContext &context, llvm::Module &module, llvm::Function *fn) -> std::optional<ParameterAnnotation>;
     };
 
     class FunctionAnnotation {
@@ -51,9 +51,9 @@ namespace polyglat::ir {
               Return(std::move(returnValue)) {}
 
       public:
-        static auto Create(llvm::Function *function, const std::vector<llvm::StringRef> &annotations) -> std::optional<FunctionAnnotation>;
+        static auto Create(llvm::LLVMContext &context, llvm::Function *fn, const std::vector<llvm::StringRef> &annotations) -> std::optional<FunctionAnnotation>;
 
-        static auto CreateVector(const std::vector<RawFunctionAnnotation> &annotations) -> std::vector<FunctionAnnotation>;
+        static auto CreateVector(llvm::LLVMContext &context, const std::vector<RawFunctionAnnotation> &annotations) -> std::vector<FunctionAnnotation>;
 
         [[nodiscard]] auto getFunction() const -> llvm::Function * { return Function; }
         [[nodiscard]] auto getNamespace() const -> const std::string & { return Namespace; }
