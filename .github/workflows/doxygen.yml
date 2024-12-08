@@ -32,7 +32,6 @@ jobs:
       - name: Copy schemas
         run: |
           mkdir -p site/html
-          cp -r schemas site/html
 
       - name: Doxygen
         uses: mattnotmitt/doxygen-action@edge
