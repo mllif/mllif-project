@@ -21,6 +21,7 @@
 #include <llvm/Support/CommandLine.h>
 #include <llvm/Support/Errc.h>
 #include <llvm/Support/FileSystem.h>
+#include <polyglat-ir/type.h>
 
 namespace {
     // NOLINTNEXTLINE(cert-err58-cpp, cppcoreguidelines-avoid-non-const-global-variables)
@@ -39,6 +40,7 @@ namespace {
 
 // NOLINTNEXTLINE(cppcoreguidelines-special-member-functions, hicpp-special-member-functions)
 class PolyglatPass final : public llvm::PassInfoMixin<PolyglatPass> {
+    std::vector<polyglat::ir::Type> Types;
     std::vector<polyglat::ir::FunctionAnnotation> Annotations;
 
   public:
@@ -48,11 +50,13 @@ class PolyglatPass final : public llvm::PassInfoMixin<PolyglatPass> {
 };
 
 auto PolyglatPass::run(llvm::Module &module, llvm::ModuleAnalysisManager & /**/) -> llvm::PreservedAnalyses {
-    const auto rawAnnotations = polyglat::ir::RawFunctionAnnotation::CreateVector(module.getContext(), module);
-    Annotations = polyglat::ir::FunctionAnnotation::CreateVector(module.getContext(), rawAnnotations);
-
-    if (Annotations.empty()) {
+    const auto layout = module.getDataLayout();
+    for (const auto type : module.getIdentifiedStructTypes()) {
+        Types.emplace_back(layout, type);
     }
+
+    const auto rawAnnotations = polyglat::ir::RawFunctionAnnotation::CreateVector(module.getContext(), module);
+    Annotations = polyglat::ir::FunctionAnnotation::CreateVector(module, rawAnnotations);
 
     return llvm::PreservedAnalyses::all();
 }
@@ -77,20 +81,22 @@ PolyglatPass::~PolyglatPass() {
         // return
     }
 
-    for (const auto &annotation : Annotations) {
-        os << annotation.getNamespace() << '/' << annotation.getName() << '\n';
+    os << "<?xml version=\"1.0\"?><assembly>";
+    for (const auto& type: Types) {
+        os << type.ToString();
     }
+    for (const auto& annotation: Annotations) {
+        os << annotation.ToString();
+    }
+    os << "</assembly>";
 }
 
 extern "C" auto LLVM_ATTRIBUTE_WEAK llvmGetPassPluginInfo() -> llvm::PassPluginLibraryInfo {
-    std::cerr << "Polyglat IR collector plugin\n";
     return llvm::PassPluginLibraryInfo{
         .APIVersion = LLVM_PLUGIN_API_VERSION,
         .PluginName = "polyglat",
         .PluginVersion = __TIME__,
         .RegisterPassBuilderCallbacks = [](llvm::PassBuilder &PB) {
-            std::cerr << "Polyglat IR collector plugin 222\n";
-
             // #1 REGISTRATION FOR "opt -passes=print<opcode-counter>"
             PB.registerPipelineParsingCallback(
                 [&](const llvm::StringRef Name, llvm::ModulePassManager &MAM, llvm::ArrayRef<llvm::PassBuilder::PipelineElement>) {

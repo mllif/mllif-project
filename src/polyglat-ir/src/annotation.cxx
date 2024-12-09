@@ -1,5 +1,6 @@
 #include "polyglat-ir/annotation.h"
 
+#include <iostream>
 #include <map>
 #include <polyglat-ir/diagnostics.h>
 #include <polyglat-shared/annotation.h>
@@ -62,12 +63,9 @@ auto polyglat::ir::RawFunctionAnnotation::CreateVector(llvm::LLVMContext &contex
 }
 
 auto polyglat::ir::ParameterAnnotation::ParseCallInst(
-    llvm::LLVMContext &context,
     llvm::Module &module,
 // ReSharper disable once CppParameterMayBeConstPtrOrRef
-    llvm::Function *fn,
-// ReSharper disable once CppParameterMayBeConstPtrOrRef
-    llvm::CallInst *call) -> std::optional<std::pair<std::string, std::string>> {
+    llvm::CallInst *call) -> std::optional<std::tuple<std::size_t, std::string, std::string>> {
     const auto callee = call->getCalledFunction();
     if (!callee->isIntrinsic() ||
         !callee->getName().starts_with("llvm.var.annotation")) {
@@ -83,34 +81,38 @@ auto polyglat::ir::ParameterAnnotation::ParseCallInst(
         }
     }
     if (argIndex == callee->arg_size()) {
-        context.diagnose(NoSuchParameterError(argName.str(), "function", fn->getName().str()));
+        module.getContext().emitError(call, std::format("Annotated parameter '{}' is not found in function", argName.str()));
         return std::nullopt;
     }
 
     const auto annotationVarName = call->getOperand(1)->getName();
     const auto annotationVar = module.getGlobalVariable(annotationVarName, true);
     if (!annotationVar) {
-        context.diagnose(NoSuchGlobalVariableError(annotationVarName.str()));
+        module.getContext().emitError(call, std::format("No such global-variable '{}'", annotationVarName.str()));
         return std::nullopt;
     }
 
     const auto initializer = dyn_cast<llvm::ConstantDataArray>(annotationVar->getInitializer());
     if (!initializer || !initializer->isCString()) {
-        context.diagnose(InvalidInitializerError(
-            "annotation variable of parameter",
-            std::format("{}' of function '{}", argName.str(), fn->getName().str())));
+        module.getContext().emitError(call, std::format("Invalid initializer of global-variable '{}'", annotationVarName.str()));
         return std::nullopt;
     }
 
     const std::string annotation(initializer->getAsCString());
-    return shared::ParseAnnotation(annotation);
+
+    if (auto annot = shared::ParseAnnotation(annotation)) {
+        auto [key, value] = *annot;
+        return std::make_tuple(argIndex, key, value);
+    }
+
+    return std::nullopt;
 }
 
-auto polyglat::ir::ParameterAnnotation::Create(llvm::LLVMContext &context, llvm::Module &module, llvm::Function *fn) -> std::optional<ParameterAnnotation> {
-    auto ret = 0U;
+auto polyglat::ir::ParameterAnnotation::Create(llvm::Module &module, llvm::Function *fn) -> std::vector<ParameterAnnotation> {
+
+    std::vector<ParameterAnnotation> annotations{ fn->arg_size() };
 
     // NOLINTNEXTLINE(*-const-correctness)
-    std::string type, name;
     for (auto &block : *fn) {
         for (auto &inst : block) {
             const auto call = dyn_cast<llvm::CallInst>(&inst);
@@ -118,37 +120,38 @@ auto polyglat::ir::ParameterAnnotation::Create(llvm::LLVMContext &context, llvm:
                 continue;
             }
 
-            const auto pair = ParseCallInst(context, module, fn, call);
+            const auto pair = ParseCallInst(module, call);
             if (!pair) {
                 continue;
             }
 
-            if (auto [key, value] = pair.value(); key == shared::TYPE) {
-                type = value;
-                ret |= 1U;
+            if (auto [index, key, value] = pair.value(); key == shared::TYPE) {
+                annotations[index].Type = value;
             } else if (key == shared::NAME) {
-                name = value;
-                ret |= 2U;
+                annotations[index].Name = value;
             } else {
-                context.diagnose(UnrecognizedAttributeError(key, "of a parameter of function", fn->getName().str()));
+                module.getContext().diagnose(UnrecognizedAttributeError(key, "of a parameter of function", fn->getName().str()));
             }
         }
     }
 
-    if ((ret & 1U) == 0) {
-        context.diagnose(TypeRequiredError("a parameter of function", fn->getName().str()));
-    }
-    if ((ret & 2U) == 0) {
-        context.diagnose(NameRequiredError("a parameter of function", fn->getName().str()));
-    }
-    if (ret != 3) {
-        return std::nullopt;
+    for (const auto &annotation : annotations) {
+        if (annotation.Type.empty()) {
+            module.getContext().diagnose(TypeRequiredError("a parameter of function", fn->getName().str()));
+        }
+        if (annotation.Name.empty()) {
+            module.getContext().diagnose(NameRequiredError("a parameter of function", fn->getName().str()));
+        }
     }
 
-    return ParameterAnnotation{type, name};
+    return annotations;
 }
 
-auto polyglat::ir::FunctionAnnotation::Create(llvm::LLVMContext &context, llvm::Function *fn, const std::vector<llvm::StringRef> &annotations) -> std::optional<FunctionAnnotation> {
+auto polyglat::ir::ParameterAnnotation::ToString() const -> std::string {
+    return std::format("<param type=\"{}\" name=\"{}\"/>", Type, Name);
+}
+
+auto polyglat::ir::FunctionAnnotation::Create(llvm::Module &module, llvm::Function *fn, const std::vector<llvm::StringRef> &annotations) -> std::optional<FunctionAnnotation> {
     auto ret = 0U;
 
     std::string ns, name, callconv, retT;
@@ -171,30 +174,32 @@ auto polyglat::ir::FunctionAnnotation::Create(llvm::LLVMContext &context, llvm::
             retT = value;
             ret |= 1U << 3U;
         } else {
-            context.diagnose(UnrecognizedAttributeError(key, "of a parameter of function", fn->getName().str()));
+            module.getContext().diagnose(UnrecognizedAttributeError(key, "of a parameter of function", fn->getName().str()));
         }
     }
 
     if ((ret & 1U) == 0) {
-        context.diagnose(NamespaceRequiredError("function", fn->getName().str()));
+        module.getContext().diagnose(NamespaceRequiredError("function", fn->getName().str()));
     }
     if ((ret & 1U << 1U) == 0) {
-        context.diagnose(NameRequiredError("function", fn->getName().str()));
+        module.getContext().diagnose(NameRequiredError("function", fn->getName().str()));
     }
     if ((ret & 1U << 2U) == 0) {
-        context.diagnose(CallConvRequiredError("function", fn->getName().str()));
+        module.getContext().diagnose(CallConvRequiredError("function", fn->getName().str()));
     }
     if ((ret & 1U << 3U) == 0) {
-        context.diagnose(ReturnTypeRequiredError("function", fn->getName().str()));
+        module.getContext().diagnose(ReturnTypeRequiredError("function", fn->getName().str()));
     }
     if (constexpr unsigned ALL = 0b1111; ret != ALL) {
         return std::nullopt;
     }
 
-    return FunctionAnnotation{fn, ns, name, callconv, retT};
+    const auto params = ParameterAnnotation::Create(module, fn);
+
+    return FunctionAnnotation{fn, ns, name, callconv, retT, params};
 }
 
-auto polyglat::ir::FunctionAnnotation::CreateVector(llvm::LLVMContext &context, const std::vector<RawFunctionAnnotation> &annotations) -> std::vector<FunctionAnnotation> {
+auto polyglat::ir::FunctionAnnotation::CreateVector(llvm::Module &module, const std::vector<RawFunctionAnnotation> &annotations) -> std::vector<FunctionAnnotation> {
 
     std::map<llvm::Function *, std::vector<llvm::StringRef>> map;
     for (auto annotation : annotations) {
@@ -203,10 +208,27 @@ auto polyglat::ir::FunctionAnnotation::CreateVector(llvm::LLVMContext &context, 
 
     std::vector<FunctionAnnotation> ret;
     for (const auto &[fn, annotations] : map) {
-        if (auto annotation = Create(context, fn, annotations)) {
+        if (auto annotation = Create(module, fn, annotations)) {
             ret.push_back(annotation.value());
         }
     }
 
     return ret;
+}
+
+auto polyglat::ir::FunctionAnnotation::ToString() const -> std::string {
+    std::ostringstream os;
+    os << "<function ns=\"" << Namespace << "\" name=\"" << Name << "\" callconv=\"" << CallConv << "\" return=\"" << Return << '"';
+
+    if (Parameters.empty()) {
+        os << "/>";
+    } else {
+        os << '>';
+        for (const auto &annotation : Parameters) {
+            os << annotation.ToString();
+        }
+        os << "</function>";
+    }
+
+    return os.str();
 }
