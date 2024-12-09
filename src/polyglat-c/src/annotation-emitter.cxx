@@ -1,6 +1,6 @@
 
-#include "polyglat-c/pch.h"
 #include "polyglat-c/annotation-emitter.h"
+#include "polyglat-c/pch.h"
 
 #include <polyglat-shared/annotation.h>
 
@@ -21,8 +21,19 @@ auto polyglat::c::AnnotationEmitter::ShouldBeAnnotated(const clang::NamedDecl *d
 
 // ReSharper disable once CppMemberFunctionMayBeStatic
 auto polyglat::c::AnnotationEmitter::VisitRecordDecl(clang::RecordDecl *decl) -> bool {
-    if (ShouldBeAnnotated(decl)) {
-        shared::CreateAnnotation(decl);
+    if (!ShouldBeAnnotated(decl)) {
+        return true;
+    }
+
+    shared::CreateAnnotation(decl);
+
+    if (const auto cxx = dyn_cast<clang::CXXRecordDecl>(decl)) {
+        if (const auto dtor = cxx->getDestructor()) {
+            shared::CreateAnnotation(dtor);
+        }
+        for (const auto method : cxx->methods()) {
+            shared::CreateAnnotation(method);
+        }
     }
 
     return true;
@@ -62,7 +73,7 @@ auto polyglat::c::AnnotationEmitter::VisitFunctionDecl(clang::FunctionDecl *decl
 class ASTConsumer final : public clang::SemaConsumer {
     clang::Sema *Sema = nullptr;
 
-public:
+  public:
     void HandleTranslationUnit(clang::ASTContext &ctx) override {
         polyglat::c::AnnotationEmitter emitter{Sema};
         emitter.TraverseDecl(ctx.getTranslationUnitDecl());
