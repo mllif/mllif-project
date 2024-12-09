@@ -1,6 +1,6 @@
 function(add_polyglat_library target language)
     foreach (SOURCE ${ARGN})
-        string(REGEX REPLACE "[.][^.]*$" ".bc" BITCODE "${SOURCE}")
+        string(REGEX REPLACE "[.][^.]*$" ".ll" BITCODE "${SOURCE}")
         string(REGEX REPLACE "^${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}" BITCODE "${BITCODE}")
         set(BITCODES ${BITCODES} "${BITCODE}")
     endforeach ()
@@ -11,7 +11,7 @@ function(add_polyglat_library target language)
                 OUTPUT ${arg_0}
                 COMMAND ${${COMPILER}}
                 -fplugin="${POLYGLAT_PATH}/polyglat-c.so"
-                -emit-llvm
+                -S -emit-llvm
                 $<TARGET_PROPERTY:${target},COMPILE_OPTIONS>
                 -c "${arg_1}"
                 -o "${arg_0}"
@@ -19,13 +19,14 @@ function(add_polyglat_library target language)
         )
     endforeach ()
 
-    set(ENSEMBLE_BITCODE "$<TARGET_PROPERTY:${target},BINARY_DIR>/$<TARGET_PROPERTY:${target},PREFIX>${target}.bc")
+    set(TARGET_PSM_FILE "$<TARGET_PROPERTY:${target},LIBRARY_OUTPUT_DIRECTORY>/$<TARGET_PROPERTY:${target},PREFIX>${target}.psm")
+    set(ENSEMBLE_BITCODE "$<TARGET_PROPERTY:${target},BINARY_DIR>/$<TARGET_PROPERTY:${target},PREFIX>${target}.ll")
     add_custom_target(${target}
             COMMAND llvm-link ${BITCODES} -o "${ENSEMBLE_BITCODE}"
             COMMAND opt
             -load-pass-plugin="${POLYGLAT_PATH}/polyglat-ir.so"
             --passes=polyglat
-            --polyglat-output="$<TARGET_PROPERTY:${target},LIBRARY_OUTPUT_DIRECTORY>/$<TARGET_PROPERTY:${target},PREFIX>${target}.psm"
+            --polyglat-output="${TARGET_PSM_FILE}"
             "${ENSEMBLE_BITCODE}"
             -o "${ENSEMBLE_BITCODE}"
             COMMAND clang -shared $<TARGET_PROPERTY:${target},LINK_OPTIONS> "${ENSEMBLE_BITCODE}"
@@ -34,6 +35,7 @@ function(add_polyglat_library target language)
     )
     set_target_properties(${target} PROPERTIES
             LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+            TARGET_PSM_FILE "${TARGET_PSM_FILE}"
             PREFIX "${CMAKE_SHARED_LIBRARY_PREFIX}"
             SUFFIX "${CMAKE_SHARED_LIBRARY_SUFFIX}"
     )
