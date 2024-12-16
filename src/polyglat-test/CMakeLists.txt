@@ -1,10 +1,8 @@
 project(polyglat-test LANGUAGES CXX)
 
-set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "ON" FORCE)
-
-file(GLOB_RECURSE SOURCES src/*.*)
+file(GLOB_RECURSE SOURCES src/*.cxx)
 add_polyglat_library(polyglat-test CXX ${SOURCES})
-add_dependencies(polyglat-test polyglat-c polyglat-ir)
+add_dependencies(polyglat-test polyglat-c)
 
 set_target_properties(polyglat-test PROPERTIES
         LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
