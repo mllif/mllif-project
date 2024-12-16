@@ -8,14 +8,13 @@ namespace clang {
 } // namespace clang
 
 namespace polyglat::shared {
-    constexpr std::string Namespace = "__polyglat__";
+    constexpr std::string Namespace = "$pg";
 
-#define LILAC_DEFINE_ANNOTATION_KEY(value) constexpr std::string value = #value
-    // Use string rather than integer code to be human-readable
-    LILAC_DEFINE_ANNOTATION_KEY(PATH);
-    LILAC_DEFINE_ANNOTATION_KEY(NAME);
-#undef LILAC_DEFINE_ANNOTATION_KEY
+    namespace prefix {
+        constexpr std::string Path = "path";
+        constexpr std::string Parm = "parm";
+        constexpr std::string Type = "type";
+    }
 
-    void MarkAsTarget(clang::FunctionDecl *decl);
     void CreateAnnotation(clang::FunctionDecl *decl);
 } // namespace polyglat::shared
