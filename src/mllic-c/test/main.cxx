@@ -1,7 +1,7 @@
 
 namespace TestNS
 {
-    struct [[polyglat::export]] TestStruct {
+    struct [[mllic::export]] TestStruct {
         int A;
         int B;
 

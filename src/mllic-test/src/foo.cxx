@@ -1,7 +1,7 @@
 
 namespace ns {
     struct record {
-        [[polyglat::export]] int foo(int a);
+        [[mllic::export]] int foo(int a);
     };
 }
 

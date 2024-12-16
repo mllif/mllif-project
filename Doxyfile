@@ -5,7 +5,7 @@
 #---------------------------------------------------------------------------
 
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "Polyglat"
+PROJECT_NAME           = "MLLIC"
 PROJECT_NUMBER         =
 PROJECT_BRIEF          = "Cross-language integration system"
 PROJECT_LOGO           =
@@ -194,7 +194,7 @@ FILE_PATTERNS          = *.c \
 RECURSIVE              = YES
 EXCLUDE                =
 EXCLUDE_SYMLINKS       = NO
-EXCLUDE_PATTERNS       = */polyglat-test/* */test/*
+EXCLUDE_PATTERNS       = */mllic-test/* */test/*
 EXCLUDE_SYMBOLS        =
 EXAMPLE_PATH           =
 EXAMPLE_PATTERNS       = *

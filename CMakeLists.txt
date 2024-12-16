@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.26)
-project(polyglat)
+project(mllic)
 
 set(ENABLE_LLVM_SHARED ON)
 
@@ -7,9 +7,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/build/bin/")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/build/lib/")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/build/lib/")
 
-set(POLYGLAT_PATH "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
+set(MLLIC_PATH "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
-include(Polyglat)
+include(UseMLLIC)
 include(UseClang)
 include(UseLLVM)
 include(CTest)

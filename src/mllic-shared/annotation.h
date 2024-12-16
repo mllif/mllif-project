@@ -7,8 +7,8 @@ namespace clang {
     class FunctionDecl;
 } // namespace clang
 
-namespace polyglat::shared {
-    constexpr std::string Namespace = "$pg";
+namespace mllic::shared {
+    constexpr std::string Namespace = "$mllic";
 
     namespace prefix {
         constexpr std::string Path = "path";
@@ -17,4 +17,4 @@ namespace polyglat::shared {
     }
 
     void CreateAnnotation(clang::FunctionDecl *decl);
-} // namespace polyglat::shared
+} // namespace mllic::shared

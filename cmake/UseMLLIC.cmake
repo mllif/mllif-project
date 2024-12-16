@@ -1,4 +1,4 @@
-function(add_polyglat_library target language)
+function(add_mllic_library target language)
     foreach (SOURCE ${ARGN})
         string(REGEX REPLACE "[.][^.]*$" ".cir" CIR "${SOURCE}")
         string(REGEX REPLACE "[.][^.]*$" ".mlir" MLIR "${SOURCE}")
@@ -22,7 +22,7 @@ function(add_polyglat_library target language)
         add_custom_command(
                 OUTPUT ${LL}
                 COMMAND ${${COMPILER}}
-                -fplugin="${POLYGLAT_PATH}/polyglat-c.so"
+                -fplugin="${MLLIC_PATH}/mllic-c.so"
                 -emit-cir
                 $<TARGET_PROPERTY:${target},COMPILE_OPTIONS>
                 "${INPUT}" -o "${CIR}"

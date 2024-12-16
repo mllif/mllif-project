@@ -1,5 +1,5 @@
-#include "polyglat-shared/annotation.h"
-#include "polyglat-shared/pch.h"
+#include "mllic-shared/annotation.h"
+#include "mllic-shared/pch.h"
 
 namespace {
     template<typename T>
@@ -42,7 +42,7 @@ namespace {
 
         decl->addAttr(clang::AnnotateAttr::CreateImplicit(
             decl->getASTContext(),
-            polyglat::shared::Namespace + '.' + key,
+            mllic::shared::Namespace + '.' + key,
             args.data(),
             args.size()));
     }
@@ -59,7 +59,7 @@ namespace {
     }
 } // namespace
 
-void polyglat::shared::CreateAnnotation(clang::FunctionDecl *decl) {
+void mllic::shared::CreateAnnotation(clang::FunctionDecl *decl) {
     const auto dirs = GetPath(decl);
     ApplyAnnotation(decl, prefix::Path, dirs);
 

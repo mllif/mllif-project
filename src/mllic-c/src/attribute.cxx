@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include "polyglat-c/pch.h"
-#include "polyglat-shared/annotation.h"
+#include "mllic-c/pch.h"
+#include "mllic-shared/annotation.h"
 
 namespace {
     class ExportAttrInfo final : public clang::ParsedAttrInfo {
@@ -25,15 +25,15 @@ namespace {
             static constexpr std::array<Spelling, 3> S = {{
                 {
                     .Syntax = clang::ParsedAttr::AS_GNU,
-                    .NormalizedFullName = "polyglat_export",
+                    .NormalizedFullName = "mllic_export",
                 },
                 {
                     .Syntax = clang::ParsedAttr::AS_C23,
-                    .NormalizedFullName = "polyglat::export",
+                    .NormalizedFullName = "mllic::export",
                 },
                 {
                     .Syntax = clang::ParsedAttr::AS_CXX11,
-                    .NormalizedFullName = "polyglat::export",
+                    .NormalizedFullName = "mllic::export",
                 },
             }};
             Spellings = S;
@@ -51,11 +51,11 @@ namespace {
             if (const auto record = clang::dyn_cast<clang::CXXRecordDecl>(D)) {
                 for (const auto method : record->methods()) {
                     if (method->getVisibility() != clang::Visibility::HiddenVisibility) {
-                        polyglat::shared::CreateAnnotation(method);
+                        mllic::shared::CreateAnnotation(method);
                     }
                 }
             } else if (const auto fn = clang::dyn_cast<clang::FunctionDecl>(D)) {
-                polyglat::shared::CreateAnnotation(fn); // just mark a symbol to process it later
+                mllic::shared::CreateAnnotation(fn); // just mark a symbol to process it later
             } else {
                 const auto id = S.Diags.getCustomDiagID(
                     clang::DiagnosticsEngine::Warning,
@@ -82,5 +82,5 @@ namespace {
 namespace {
     [[maybe_unused]]
     //NOLINTNEXTLINE(cert-err58-cpp) : Initialization of 'Y' with static storage duration may throw an exception that cannot be caught
-    const clang::ParsedAttrInfoRegistry::Add<ExportAttrInfo> Y("polyglat", "");
+    const clang::ParsedAttrInfoRegistry::Add<ExportAttrInfo> Y("mllic", "");
 }
