@@ -8,9 +8,7 @@ auto polyglat::c::AnnotationEmitter::ShouldBeAnnotated(const clang::NamedDecl *d
     auto target = false;
     for (const auto attr : decl->attrs()) {
         if (const auto annotationAttr = dyn_cast<clang::AnnotateAttr>(attr)) {
-            target = annotationAttr->getAnnotation().starts_with(shared::Namespace);
-        } else if (const auto annotationTypeAttr = dyn_cast<clang::AnnotateTypeAttr>(attr)) {
-            target = annotationTypeAttr->getAnnotation().starts_with(shared::Namespace);
+            target = annotationAttr->getAnnotation() == shared::Namespace;
         }
         if (target) {
             break;
@@ -20,52 +18,14 @@ auto polyglat::c::AnnotationEmitter::ShouldBeAnnotated(const clang::NamedDecl *d
 }
 
 // ReSharper disable once CppMemberFunctionMayBeStatic
-auto polyglat::c::AnnotationEmitter::VisitRecordDecl(clang::RecordDecl *decl) -> bool {
-    if (!ShouldBeAnnotated(decl)) {
-        return true;
-    }
-
-    shared::CreateAnnotation(decl);
-
-    if (const auto cxx = dyn_cast<clang::CXXRecordDecl>(decl)) {
-        if (const auto dtor = cxx->getDestructor()) {
-            shared::CreateAnnotation(dtor);
-        }
-        for (const auto method : cxx->methods()) {
-            shared::CreateAnnotation(method);
-        }
-    }
-
-    return true;
-}
-
-// ReSharper disable once CppMemberFunctionMayBeStatic
 // ReSharper disable once CppMemberFunctionMayBeConst
+// ReSharper disable once CppDFAConstantFunctionResult
 auto polyglat::c::AnnotationEmitter::VisitFunctionDecl(clang::FunctionDecl *decl) -> bool {
     if (!ShouldBeAnnotated(decl)) {
         return true;
     }
 
-    /*
-     * Parent record should be exported if its member is requested to be exported.
-     * If parent record wasn't exported, Backend couldn't recover interface
-     */
-    if (const auto parent = llvm::dyn_cast<clang::TypeDecl>(decl->getParent());
-        !decl->isStatic() && parent && !ShouldBeAnnotated(parent)) {
-
-        auto &diag = Sema->getDiagnostics();
-        const auto diagId = diag.getCustomDiagID(
-            clang::DiagnosticsEngine::Error,
-            "Member function in not-exported record cannot be exported");
-        diag.Report(decl->getLocation(), diagId);
-        return false;
-    }
-
     shared::CreateAnnotation(decl);
-
-    for (const auto arg : decl->parameters()) {
-        shared::CreateAnnotation(arg);
-    }
 
     return true;
 }

@@ -15,8 +15,7 @@
  */
 
 #include "polyglat-c/pch.h"
-
-#include <polyglat-shared/annotation.h>
+#include "polyglat-shared/annotation.h"
 
 namespace {
     class ExportAttrInfo final : public clang::ParsedAttrInfo {
@@ -41,7 +40,7 @@ namespace {
         }
 
         auto diagAppertainsToDecl(clang::Sema & /**/, const clang::ParsedAttr & /**/, const clang::Decl *D) const -> bool override {
-            return clang::dyn_cast<clang::RecordDecl>(D) || clang::dyn_cast<clang::FunctionDecl>(D);
+            return clang::dyn_cast<clang::FunctionDecl>(D) || clang::dyn_cast<clang::CXXRecordDecl>(D);
         }
 
         auto diagAppertainsToStmt(clang::Sema & /**/, const clang::ParsedAttr & /**/, const clang::Stmt * /**/) const -> bool override {
@@ -56,14 +55,19 @@ namespace {
              *    If I attempt to retrieve type-info before AST built,
              *    default type size(1)/alignment(1) will be returned.
              */
-            if (const auto record = clang::dyn_cast<clang::RecordDecl>(D)) {
-                polyglat::shared::MarkAsTarget(record); // just mark a symbol to process it later
+            if (const auto record = clang::dyn_cast<clang::CXXRecordDecl>(D)) {
+                for (const auto method : record->methods()) {
+                    if (method->getVisibility() != clang::Visibility::HiddenVisibility) {
+                        polyglat::shared::MarkAsTarget(method);
+                    }
+                }
             } else if (const auto fn = clang::dyn_cast<clang::FunctionDecl>(D)) {
                 polyglat::shared::MarkAsTarget(fn); // just mark a symbol to process it later
             } else {
                 const auto id = S.Diags.getCustomDiagID(
                     clang::DiagnosticsEngine::Warning,
-                    "%0 '%1' can not be exported; Only record and function can be exported.");
+                    "%0 '%1' can not be exported; Only function can be exported. "
+                    "If you want to export records such as class or struct, You can make a function that depends on these records");
 
                 std::string name;
                 if (const auto named = clang::dyn_cast<clang::NamedDecl>(D)) {

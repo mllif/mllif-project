@@ -20,12 +20,6 @@ namespace polyglat::c {
         explicit AnnotationEmitter(clang::Sema *sema) : Sema(sema) {}
 
         /**
-         * @brief Tries to annotate declaration of record.
-         * @param decl A declaration to be annotated.
-         */
-        auto VisitRecordDecl(clang::RecordDecl *decl) -> bool;
-
-        /**
          * @brief Tries to annotate declaration of function.
          * @param decl A declaration to be annotated.
          */
