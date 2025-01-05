@@ -1,15 +1,14 @@
-#include "mllic-shared/annotation.h"
-#include "mllic-shared/pch.h"
+#include "mllif/Shared/annotation.h"
+#include "mllif/Shared/pch.h"
 
 namespace {
-    template<typename T>
-    void ApplyAnnotation(clang::NamedDecl *decl, const std::string& key, const T &values) {
-
+    template <typename T>
+    void ApplyAnnotation(clang::NamedDecl *decl, const std::string &key, const T &values) {
         const auto &ctx = decl->getASTContext();
 
-        std::vector<clang::Expr *> args{values.size()};
+        std::vector<clang::Expr *> args;
+        args.reserve(values.size());
         for (size_t i = 0; i < values.size(); ++i) {
-
             const auto arrayTy =
                 ctx.getConstantArrayType(
                        ctx.CharTy,
@@ -18,7 +17,6 @@ namespace {
                        clang::ArraySizeModifier::Normal,
                        0)
                     .withConst();
-            const auto decayTy = ctx.getPointerType(arrayTy);
 
             const auto literal =
                 clang::StringLiteral::Create(
@@ -28,21 +26,14 @@ namespace {
                     false,
                     arrayTy,
                     {});
-            const auto decay =
-                clang::ImplicitCastExpr::Create(
-                    decl->getASTContext(),
-                    decayTy,
-                    clang::CK_ArrayToPointerDecay, literal,
-                    nullptr,
-                    clang::VK_LValue,
-                    {});
 
-            args[i] = clang::ConstantExpr::Create(decl->getASTContext(), decay);
+            args.push_back(clang::ConstantExpr::Create(decl->getASTContext(), literal));
         }
 
+        // Same size of args makes args copied... Why???
         decl->addAttr(clang::AnnotateAttr::CreateImplicit(
             decl->getASTContext(),
-            mllic::shared::Namespace + '.' + key,
+            mllif::shared::Namespace + '.' + key,
             args.data(),
             args.size()));
     }
@@ -59,18 +50,11 @@ namespace {
     }
 } // namespace
 
-void mllic::shared::CreateAnnotation(clang::FunctionDecl *decl) {
+void mllif::shared::CreateAnnotation(clang::FunctionDecl *decl) {
+    const auto isMethod = clang::dyn_cast<clang::CXXMethodDecl>(decl);
+    const std::vector type = {(isMethod ? type::Method : type::Function)};
+    ApplyAnnotation(decl, prefix::Type, type);
+
     const auto dirs = GetPath(decl);
     ApplyAnnotation(decl, prefix::Path, dirs);
-
-    std::vector<std::string> params;
-    params.reserve(decl->getNumParams());
-    for (const auto parameter : decl->parameters()) {
-        params.push_back(parameter->getNameAsString());
-    }
-    ApplyAnnotation(decl, prefix::Parm, params);
-
-    const auto isMethod = clang::dyn_cast<clang::CXXMethodDecl>(decl);
-    const std::vector<std::string> type = { isMethod ? "method" : "function" };
-    ApplyAnnotation(decl, prefix::Type, type);
 }
