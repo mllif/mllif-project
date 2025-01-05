@@ -19,5 +19,4 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 link_directories(${CMAKE_ARCHIVE_OUTPUT_DIRECTORY} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 
-include_directories(${CMAKE_CURRENT_LIST_DIR})
 add_subdirectory(mllif)

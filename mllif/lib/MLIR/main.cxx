@@ -1,10 +1,10 @@
-#include "mllif/MLIR/pch.h"
+#include "pch.h"
 
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/SourceMgr.h>
 #include <mlir/Parser/Parser.h>
 #include <mllif/MLIR/symboltree.h>
-#include <mllif/Shared/annotation.h>
+#include <mllif/annotation.h>
 
 namespace {
     std::unique_ptr<mlir::ModuleOp> LoadModule(mlir::MLIRContext& context, const std::string& filename) {

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include "mllif/C/pch.h"
-#include "mllif/Shared/annotation.h"
+#include "pch.h"
+#include "mllif/annotation.h"
 
 namespace {
     class ExportAttrInfo final : public clang::ParsedAttrInfo {

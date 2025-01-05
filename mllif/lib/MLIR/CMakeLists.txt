@@ -1,6 +1,6 @@
 project(MLLIFMLIR LANGUAGES CXX)
 
-file(GLOB_RECURSE SOURCES src/*.*)
+file(GLOB_RECURSE SOURCES *.cxx)
 
 add_executable(mllif-mlir ${SOURCES})
 target_precompile_headers(mllif-mlir PUBLIC pch.h)

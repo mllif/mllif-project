@@ -37,11 +37,12 @@ function(add_mllif_library target language)
             COMMAND clang -shared $<TARGET_PROPERTY:${target},LINK_OPTIONS> ${LLS}
             -o "$<TARGET_PROPERTY:${target},LIBRARY_OUTPUT_DIRECTORY>/$<TARGET_PROPERTY:${target},PREFIX>${target}$<TARGET_PROPERTY:${target},SUFFIX>"
             COMMAND mllif-mlir
-            "$<TARGET_PROPERTY:${target},LIBRARY_OUTPUT_DIRECTORY>/$<TARGET_PROPERTY:${target},PREFIX>${target}.msm"
+            "$<TARGET_GENEX_EVAL:MLLIFTest,$<TARGET_PROPERTY:MLLIFTest,TARGET_MSM_FILE>>"
             ${CIRS}
             DEPENDS ${LLS}
     )
     set_target_properties(${target} PROPERTIES
+            TARGET_MSM_FILE "$<TARGET_PROPERTY:${target},LIBRARY_OUTPUT_DIRECTORY>/$<TARGET_PROPERTY:${target},PREFIX>${target}.msm"
             LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
             PREFIX "${CMAKE_SHARED_LIBRARY_PREFIX}"
             SUFFIX "${CMAKE_SHARED_LIBRARY_SUFFIX}"

@@ -1,5 +1,5 @@
-#include "mllif/Shared/annotation.h"
-#include "mllif/Shared/pch.h"
+#include "pch.h"
+#include "mllif/annotation.h"
 
 namespace {
     template <typename T>

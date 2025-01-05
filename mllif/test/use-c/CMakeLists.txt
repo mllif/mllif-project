@@ -1,0 +1,1 @@
+add_test(NAME use-c-frontend COMMAND "${CMAKE_CURRENT_LIST_DIR}/test.sh" "${CMAKE_BINARY_DIR}")
