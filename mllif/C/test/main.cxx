@@ -1,7 +1,7 @@
 
 namespace TestNS
 {
-    struct [[mllic::export]] TestStruct {
+    struct [[mllif::export]] TestStruct {
         int A;
         int B;
 

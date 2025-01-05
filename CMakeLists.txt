@@ -1,15 +1,15 @@
 cmake_minimum_required(VERSION 3.26)
-project(mllic)
+project(mllif)
 
 set(ENABLE_LLVM_SHARED ON)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/build/bin/")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/build/lib/")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/build/lib/")
+set(MLLIF_PATH "${CMAKE_BINARY_DIR}/build/")
 
-set(MLLIC_PATH "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
-include(UseMLLIC)
+include(UseMLLIF)
 include(UseClang)
 include(UseLLVM)
 include(CTest)
@@ -19,4 +19,5 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 link_directories(${CMAKE_ARCHIVE_OUTPUT_DIRECTORY} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 
-add_subdirectory(src)
+include_directories(${CMAKE_CURRENT_LIST_DIR})
+add_subdirectory(mllif)

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include "mllic-c/pch.h"
-#include "mllic-shared/annotation.h"
+#include "mllif/C/pch.h"
+#include "mllif/Shared/annotation.h"
 
 namespace {
     class ExportAttrInfo final : public clang::ParsedAttrInfo {
@@ -25,15 +25,15 @@ namespace {
             static constexpr std::array<Spelling, 3> S = {{
                 {
                     .Syntax = clang::ParsedAttr::AS_GNU,
-                    .NormalizedFullName = "mllic_export",
+                    .NormalizedFullName = "mllif_export",
                 },
                 {
                     .Syntax = clang::ParsedAttr::AS_C23,
-                    .NormalizedFullName = "mllic::export",
+                    .NormalizedFullName = "mllif::export",
                 },
                 {
                     .Syntax = clang::ParsedAttr::AS_CXX11,
-                    .NormalizedFullName = "mllic::export",
+                    .NormalizedFullName = "mllif::export",
                 },
             }};
             Spellings = S;
@@ -51,11 +51,11 @@ namespace {
             if (const auto record = clang::dyn_cast<clang::CXXRecordDecl>(D)) {
                 for (const auto method : record->methods()) {
                     if (method->getVisibility() != clang::Visibility::HiddenVisibility) {
-                        mllic::shared::CreateAnnotation(method);
+                        mllif::shared::CreateAnnotation(method);
                     }
                 }
             } else if (const auto fn = clang::dyn_cast<clang::FunctionDecl>(D)) {
-                mllic::shared::CreateAnnotation(fn); // just mark a symbol to process it later
+                mllif::shared::CreateAnnotation(fn); // just mark a symbol to process it later
             } else {
                 const auto id = S.Diags.getCustomDiagID(
                     clang::DiagnosticsEngine::Warning,
@@ -82,5 +82,5 @@ namespace {
 namespace {
     [[maybe_unused]]
     //NOLINTNEXTLINE(cert-err58-cpp) : Initialization of 'Y' with static storage duration may throw an exception that cannot be caught
-    const clang::ParsedAttrInfoRegistry::Add<ExportAttrInfo> Y("mllic", "");
+    const clang::ParsedAttrInfoRegistry::Add<ExportAttrInfo> Y("mllif", "");
 }

@@ -5,9 +5,9 @@
 #---------------------------------------------------------------------------
 
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "MLLIC"
+PROJECT_NAME           = "MLLIF"
 PROJECT_NUMBER         =
-PROJECT_BRIEF          = "Cross-language integration system"
+PROJECT_BRIEF          = "a MLIR-based Language to Language Interoperability Flyover"
 PROJECT_LOGO           =
 PROJECT_ICON           =
 
@@ -194,7 +194,7 @@ FILE_PATTERNS          = *.c \
 RECURSIVE              = YES
 EXCLUDE                =
 EXCLUDE_SYMLINKS       = NO
-EXCLUDE_PATTERNS       = */mllic-test/* */test/*
+EXCLUDE_PATTERNS       = */mllif-test/* */test/*
 EXCLUDE_SYMBOLS        =
 EXAMPLE_PATH           =
 EXAMPLE_PATTERNS       = *
@@ -204,7 +204,7 @@ INPUT_FILTER           =
 FILTER_PATTERNS        =
 FILTER_SOURCE_FILES    = NO
 FILTER_SOURCE_PATTERNS =
-USE_MDFILE_AS_MAINPAGE = docs/README.md
+USE_MDFILE_AS_MAINPAGE = README.md
 FORTRAN_COMMENT_AFTER  = 72
 
 #---------------------------------------------------------------------------

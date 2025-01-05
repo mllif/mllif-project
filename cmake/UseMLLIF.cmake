@@ -1,4 +1,4 @@
-function(add_mllic_library target language)
+function(add_mllif_library target language)
     foreach (SOURCE ${ARGN})
         string(REGEX REPLACE "[.][^.]*$" ".cir" CIR "${SOURCE}")
         string(REGEX REPLACE "[.][^.]*$" ".mlir" MLIR "${SOURCE}")
@@ -19,10 +19,11 @@ function(add_mllic_library target language)
         set(LL "${arg_2}")
         set(INPUT "${arg_3}")
 
+        set(PIPELINE "any(mllif-cir)")
         add_custom_command(
                 OUTPUT ${LL}
                 COMMAND ${${COMPILER}}
-                -fplugin="${MLLIC_PATH}/mllic-c.so"
+                -fplugin="${MLLIF_PATH}lib/MLLIFC.so"
                 -emit-cir
                 $<TARGET_PROPERTY:${target},COMPILE_OPTIONS>
                 "${INPUT}" -o "${CIR}"
@@ -32,16 +33,16 @@ function(add_mllic_library target language)
         )
     endforeach ()
 
-    set(TARGET_PSM_FILE "$<TARGET_PROPERTY:${target},LIBRARY_OUTPUT_DIRECTORY>/$<TARGET_PROPERTY:${target},PREFIX>${target}.psm")
-    set(ENSEMBLE_LL "$<TARGET_PROPERTY:${target},BINARY_DIR>/$<TARGET_PROPERTY:${target},PREFIX>${target}.ll")
     add_custom_target(${target}
             COMMAND clang -shared $<TARGET_PROPERTY:${target},LINK_OPTIONS> ${LLS}
             -o "$<TARGET_PROPERTY:${target},LIBRARY_OUTPUT_DIRECTORY>/$<TARGET_PROPERTY:${target},PREFIX>${target}$<TARGET_PROPERTY:${target},SUFFIX>"
+            COMMAND mllif-mlir
+            "$<TARGET_PROPERTY:${target},LIBRARY_OUTPUT_DIRECTORY>/$<TARGET_PROPERTY:${target},PREFIX>${target}.msm"
+            ${CIRS}
             DEPENDS ${LLS}
     )
     set_target_properties(${target} PROPERTIES
             LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
-            TARGET_PSM_FILE "${TARGET_PSM_FILE}"
             PREFIX "${CMAKE_SHARED_LIBRARY_PREFIX}"
             SUFFIX "${CMAKE_SHARED_LIBRARY_SUFFIX}"
     )

@@ -5,7 +5,7 @@ PREDIR="$(pwd)"
 cd "$(dirname $(realpath $0))"
 
 # Compile test source with plugin
-(clang++ -fplugin="$1/build/lib/mllic-c.so" -g -S -emit-llvm -Werror main.cxx -o main.ll) || exit 1
+(clang++ -fplugin="$1/build/lib/MLLIFC.so" -g -S -emit-llvm -Werror main.cxx -o main.ll) || exit 1
 
 # Restore environment
 cd "$PREDIR"

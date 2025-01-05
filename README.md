@@ -1,9 +1,11 @@
-# :tada: Welcome to MLLIC!
+# 🎉 Welcome to MLLIF!
 
-***MLLIC*** is a ***M***LIR based ***L***anguage to ***L***anguage ***I***nteroperability bridge ***C***ompiler -
+***MLLIF*** is a ***M***LIR based ***L***anguage to ***L***anguage ***I***nteroperability ***F***lyover -
 with a goal to integrate API of all programming languages.
 
-## Requisites
+For details, See [docs](https://mllif.sharp0802.com)!
+
+## 📦 Dependencies
 
 |                      |             Origin              | Tested on |
 |:--------------------:|:-------------------------------:|:---------:|
