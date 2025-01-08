@@ -2,7 +2,7 @@ project(MLLIFTest LANGUAGES CXX)
 
 file(GLOB_RECURSE SOURCES *.cxx)
 add_mllif_library(MLLIFTest CXX ${SOURCES})
-add_dependencies(MLLIFTest MLLIFC mllif-mlir)
+add_dependencies(MLLIFTest MLLIFCFront mllif-mlir)
 
 set_target_properties(MLLIFTest PROPERTIES
         LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
