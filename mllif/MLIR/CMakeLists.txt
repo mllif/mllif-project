@@ -1,9 +1,11 @@
 project(MLLIFMLIR LANGUAGES CXX)
 
-file(GLOB_RECURSE SOURCES *.cxx)
+file(GLOB_RECURSE SOURCES lib/*.*)
+file(GLOB_RECURSE HEADERS include/*.*)
 
-add_executable(mllif-mlir ${SOURCES})
-target_precompile_headers(mllif-mlir PUBLIC pch.h)
+add_executable(mllif-mlir ${SOURCES} ${HEADERS})
+target_include_directories(mllif-mlir PUBLIC include)
+target_precompile_headers(mllif-mlir PUBLIC lib/pch.h)
 
 target_link_libraries(mllif-mlir PUBLIC
         MLLIFShared
@@ -37,4 +39,4 @@ target_link_libraries(mllif-mlir PUBLIC
         LLVMSupport
 )
 
-#add_test(NAME mllif-cir COMMAND "${CMAKE_CURRENT_LIST_DIR}/test/test.sh" "${CMAKE_BINARY_DIR}")
+add_subdirectory(test)
