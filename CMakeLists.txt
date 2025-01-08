@@ -19,5 +19,9 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 add_subdirectory(mllif)
 
-add_custom_target(mllif ALL)
-add_dependencies(mllif )
+install(TARGETS MLLIFCFront mllif-mlir MLLIFSharedFront
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        PUBLIC_HEADER DESTINATION include
+)
