@@ -3,7 +3,7 @@
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/SourceMgr.h>
 #include <mlir/Parser/Parser.h>
-#include <mllif/Frontend/MLIR/symboltree.h>
+#include <mllif/Frontend/MLIR/Tree.h>
 #include <mllif/Frontend/annotation.h>
 
 namespace {
@@ -66,7 +66,7 @@ auto main(int argc, char **argv) -> int {
     const std::string output = argv[1];
 
 
-    mllif::mlir::SymbolTree tree;
+    mllif::mlir::Tree tree;
 
     for (auto i = 2; i < argc; ++i) {
         auto module = LoadModule(context, std::string(argv[i]));
@@ -146,8 +146,7 @@ auto main(int argc, char **argv) -> int {
                 return;
             }
 
-            auto fnSym = tree.insert(path);
-            fnSym.tag = tag;
+            const auto fnSym = tree.root().insert_inplace(path, tag);
 
             for (auto iParm = 0; iParm < args.size(); ++iParm) {
                 std::string buffer;
@@ -155,9 +154,11 @@ auto main(int argc, char **argv) -> int {
                 args[iParm].getType().print(os);
                 os.flush();
 
-                auto parmSym = mllif::mlir::Symbol("param", argNames[iParm]);
-                parmSym.attributes.emplace_back("type", buffer);
-                fnSym.children.push_back(parmSym);
+                fnSym
+                    ->children()
+                    .emplace_back("param", argNames[iParm])
+                    .attributes()
+                    .emplace_back("type", buffer);
             }
         });
     }
@@ -169,7 +170,7 @@ auto main(int argc, char **argv) -> int {
         return 1;
     }
 
-    tree.print(os);
+    tree.root().print(os);
 
     return 0;
 }
