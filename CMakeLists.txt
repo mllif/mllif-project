@@ -17,6 +17,7 @@ include(CTest)
 set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-link_directories(${CMAKE_ARCHIVE_OUTPUT_DIRECTORY} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
-
 add_subdirectory(mllif)
+
+add_custom_target(mllif ALL)
+add_dependencies(mllif )
