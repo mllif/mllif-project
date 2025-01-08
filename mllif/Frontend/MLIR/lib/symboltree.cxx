@@ -1,4 +1,4 @@
-#include "mllif/MLIR/symboltree.h"
+#include "mllif/Frontend/MLIR/symboltree.h"
 
 void mllif::mlir::Symbol::print(llvm::raw_ostream &ss, std::size_t indent) const {
     const std::string tab(indent, '\t');

@@ -3,8 +3,8 @@
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/SourceMgr.h>
 #include <mlir/Parser/Parser.h>
-#include <mllif/MLIR/symboltree.h>
-#include <mllif/annotation.h>
+#include <mllif/Frontend/MLIR/symboltree.h>
+#include <mllif/Frontend/annotation.h>
 
 namespace {
     std::unique_ptr<mlir::ModuleOp> LoadModule(mlir::MLIRContext& context, const std::string& filename) {
