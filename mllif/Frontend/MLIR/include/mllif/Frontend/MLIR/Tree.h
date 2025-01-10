@@ -55,63 +55,11 @@ namespace mllif::mlir {
         std::vector<Node> &children() { return _children; }
         const std::vector<Node> &children() const { return _children; }
 
-        void print(llvm::raw_ostream &os) const {
-            os << '<' << tag();
+        void print(llvm::raw_ostream &os) const;
 
-            if (name().size()) {
-                os << " id=\"" << Escape(name()) << '"';
-            }
+        Node *insert_inplace(std::deque<std::string> &path, const std::string &tag);
 
-            if (attributes().size()) {
-                for (const auto &[key, value] : _attributes) {
-                    os << ' ' << key << "=\"" << Escape(value) << '"';
-                }
-            }
-
-            if (children().empty()) {
-                os << "/>";
-                return;
-            }
-
-            os << '>';
-            for (const auto &child : children()) {
-                child.print(os);
-            }
-            os << "</" << tag() << '>';
-        }
-
-        Node *insert_inplace(std::deque<std::string> &path, const std::string &tag) {
-            if (path.empty()) {
-                return nullptr;
-            }
-
-            for (auto &child : children()) {
-                if (const auto p = child.insert(path, tag))
-                    return p;
-            }
-
-            auto &node = children().emplace_back(path.size() > 1 ? "namespace" : tag, path.front());
-            path.pop_front();
-            auto p = node.insert_inplace(path, tag);
-            if (!p) {
-                p = &node;
-            }
-
-            return p;
-        }
-
-        Node *insert(std::deque<std::string> &path, const std::string &tag) {
-            if (path.empty() || path.front() != name()) {
-                return nullptr;
-            }
-
-            path.pop_front();
-            if (path.empty()) {
-                return this;
-            }
-
-            return insert_inplace(path, tag);
-        }
+        Node *insert(std::deque<std::string> &path, const std::string &tag);
     };
 
     class Tree {
