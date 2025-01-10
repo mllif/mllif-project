@@ -68,7 +68,7 @@ namespace mllif::mlir {
                 }
             }
 
-            if (children().size()) {
+            if (children().empty()) {
                 os << "/>";
                 return;
             }
