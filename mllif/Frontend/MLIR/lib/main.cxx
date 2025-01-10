@@ -7,7 +7,7 @@
 #include <mllif/Frontend/annotation.h>
 
 namespace {
-    std::unique_ptr<mlir::ModuleOp> LoadModule(mlir::MLIRContext& context, const std::string& filename) {
+    auto LoadModule(mlir::MLIRContext& context, const std::string& filename) -> std::unique_ptr<mlir::ModuleOp> {
 
         llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> fileOrErr = llvm::MemoryBuffer::getFile(filename);
         if (const std::error_code ec = fileOrErr.getError()) {
@@ -28,7 +28,7 @@ namespace {
     }
 
     template<typename T>
-    bool Store(const mlir::ArrayAttr& array, std::string from, std::string name, T& container) {
+    auto Store(const mlir::ArrayAttr& array, std::string from, std::string name, T& container) -> bool {
         bool success = true;
         for (auto value : array) {
             const auto str = mlir::dyn_cast<mlir::StringAttr>(value);

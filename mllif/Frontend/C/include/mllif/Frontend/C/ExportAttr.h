@@ -4,6 +4,9 @@
 
 namespace mllif::c {
 
+    /**
+     * @brief `clang::ParsedAttrInfo` implementation for MLLIF targets
+     */
     class ExportAttrInfo final : public clang::ParsedAttrInfo {
       public:
         ExportAttrInfo();
