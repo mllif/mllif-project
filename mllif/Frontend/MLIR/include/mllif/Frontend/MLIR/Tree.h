@@ -92,9 +92,12 @@ namespace mllif::mlir {
 
             auto &node = children().emplace_back(path.size() > 1 ? "namespace" : tag, path.front());
             path.pop_front();
-            node.insert_inplace(path, tag);
+            auto p = node.insert_inplace(path, tag);
+            if (!p) {
+                p = &node;
+            }
 
-            return &node;
+            return p;
         }
 
         Node *insert(std::deque<std::string> &path, const std::string &tag) {
