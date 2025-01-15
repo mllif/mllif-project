@@ -89,7 +89,7 @@ struct CIRAnnotatedData {
     }
 };
 
-void mllif::mlir::cir::CIRAdapter::handle(Tree &symbols, ::mlir::Operation *op) {
+void mllif::mlir::cir::CIRAdapter::handle(Tree &symbols, std::shared_ptr<::mlir::ModuleOp> module, ::mlir::Operation *op) {
     auto fn = dyn_cast<::cir::FuncOp>(op);
     if (!fn) return;
 

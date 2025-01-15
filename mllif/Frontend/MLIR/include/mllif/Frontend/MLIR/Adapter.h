@@ -10,7 +10,7 @@ namespace mllif::mlir {
       public:
         virtual ~Adapter() = default;
 
-        virtual void handle(Tree& symbols, ::mlir::Operation* op) = 0;
+        virtual void handle(Tree& symbols, std::shared_ptr<::mlir::ModuleOp> module, ::mlir::Operation* op) = 0;
     };
 
     extern std::vector<std::shared_ptr<Adapter>> Adapters;
