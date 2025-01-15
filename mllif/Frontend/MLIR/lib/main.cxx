@@ -43,15 +43,15 @@ auto main(int argc, char **argv) -> int {
     mllif::mlir::Tree symbols;
 
     for (auto i = 2; i < argc; ++i) {
-        const auto module = LoadModule(context, std::string(argv[i]));
+        const std::shared_ptr module = LoadModule(context, std::string(argv[i]));
 
-        module->walk([&symbols](mlir::Operation* op, const mlir::WalkStage& stage) {
+        module->walk([&module, &symbols](mlir::Operation* op, const mlir::WalkStage& stage) {
             if (!stage.isAfterAllRegions()) {
                 return;
             }
 
             for (const auto adapter : mllif::mlir::Adapters) {
-                adapter->handle(symbols, op);
+                adapter->handle(symbols, module, op);
             }
         });
     }

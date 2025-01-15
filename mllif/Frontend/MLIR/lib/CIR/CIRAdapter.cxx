@@ -2,6 +2,7 @@
 
 #include <mllif/Frontend/MLIR/Adapter.h>
 #include <mllif/Frontend/MLIR/CIR/CIRAdapter.h>
+#include <mllif/Frontend/MLIR/TypeReg.h>
 #include <mllif/Frontend/annotation.h>
 
 namespace {
@@ -130,16 +131,20 @@ void mllif::mlir::cir::CIRAdapter::handle(Tree &symbols, std::shared_ptr<::mlir:
     }
 
     for (auto iParm = 0; iParm < args.size(); ++iParm) {
-        std::string buffer;
-        llvm::raw_string_ostream os(buffer);
-        args[iParm].getType().print(os);
-        os.flush();
+        auto type = Types::From(args[iParm].getType(), module);
+        if (!type) {
+            llvm::errs() << "error: unrecognized type '";
+            args[iParm].getType().print(llvm::errs());
+            llvm::errs() << "'\n";
+            return;
+        }
+        const auto typeStr = type->store(symbols);
 
         fnSym
             ->children()
             .emplace_back("param", argNames[iParm])
             .attributes()
-            .emplace_back("type", buffer);
+            .emplace_back("type", typeStr);
     }
 }
 
