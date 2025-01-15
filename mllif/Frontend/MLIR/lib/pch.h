@@ -5,6 +5,7 @@
 
 #include <mlir/IR/BuiltinDialect.h>
 #include <mlir/IR/DialectRegistry.h>
+#include <mlir/IR/Types.h>
 #include <mlir/Pass/Pass.h>
 #include <mlir/Pass/PassRegistry.h>
 #include <mlir/Tools/Plugins/PassPlugin.h>
@@ -18,6 +19,7 @@
 #include <mlir/Tools/mlir-opt/MlirOptMain.h>
 
 #include <clang/CIR/Dialect/IR/CIRDialect.h>
+#include <clang/CIR/Dialect/IR/CIRTypes.h>
 #include <clang/CIR/Dialect/Passes.h>
 
 #include <map>
