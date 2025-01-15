@@ -1,8 +1,5 @@
 #include "pch.h"
-
-#include <llvm/Support/MemoryBuffer.h>
-#include <llvm/Support/SourceMgr.h>
-#include <mlir/Parser/Parser.h>
+#include <mllif/Frontend/MLIR/Adapter.h>
 #include <mllif/Frontend/MLIR/Tree.h>
 #include <mllif/Frontend/annotation.h>
 
@@ -26,23 +23,6 @@ namespace {
 
         return std::make_unique<mlir::ModuleOp>(owningModule.release());
     }
-
-    template<typename T>
-    auto Store(const mlir::ArrayAttr& array, const std::string& from, const std::string& name, T& container) -> bool {
-        bool success = true;
-        for (auto value : array) {
-            const auto str = mlir::dyn_cast<mlir::StringAttr>(value);
-            if (!str) {
-                llvm::errs() << "error: " << name << " should be string (" << from << ")\n";
-                success = false;
-                continue;
-            }
-
-            container.emplace_back(str.getValue());
-        }
-
-        return success;
-    }
 }
 
 auto main(int argc, char **argv) -> int {
@@ -50,13 +30,8 @@ auto main(int argc, char **argv) -> int {
 
     mlir::DialectRegistry registry;
     registry.insert<
-        mlir::BuiltinDialect,
-        mlir::arith::ArithDialect,
-        cir::CIRDialect,
-        mlir::memref::MemRefDialect,
-        mlir::LLVM::LLVMDialect,
-        mlir::DLTIDialect,
-        mlir::omp::OpenMPDialect>();
+#include <mllif/Frontend/MLIR/Dialects.inc>
+        >();
     context.appendDialectRegistry(registry);
 
     if (argc <= 2) {
@@ -65,100 +40,18 @@ auto main(int argc, char **argv) -> int {
     }
     const std::string output = argv[1];
 
-
-    mllif::mlir::Tree tree;
+    mllif::mlir::Tree symbols;
 
     for (auto i = 2; i < argc; ++i) {
-        auto module = LoadModule(context, std::string(argv[i]));
+        const auto module = LoadModule(context, std::string(argv[i]));
 
-        module->walk([&module, &tree](mlir::Operation* op, const mlir::WalkStage& stage) {
-            auto fn = mlir::dyn_cast<cir::FuncOp>(op);
-            if (!fn || !stage.isAfterAllRegions()) {
+        module->walk([&symbols](mlir::Operation* op, const mlir::WalkStage& stage) {
+            if (!stage.isAfterAllRegions()) {
                 return;
             }
 
-            const auto annotations = fn.getAnnotations();
-            if (!annotations || annotations->empty()) {
-                return;
-            }
-
-            std::deque<std::string> path;
-            std::string tag;
-            bool success = true;
-
-            for (auto attribute : annotations.value()) {
-                auto annotation = mlir::dyn_cast<cir::AnnotationAttr>(attribute);
-                if (!annotation) {
-                    continue;
-                }
-
-                auto key = annotation.getName().getValue();
-                if (!key.starts_with(mllif::shared::Namespace + '.')) {
-                    continue;
-                }
-
-                key = key.substr(mllif::shared::Namespace.size() + 1);
-
-                if (key == mllif::shared::prefix::Path) {
-                    success &= Store(annotation.getArgs(), fn.getSymName().str(), "path segment", path);
-
-                } else if (key == mllif::shared::prefix::Type) {
-                    const auto args = annotation.getArgs().getValue();
-                    if (args.size() < 1) {
-                        llvm::errs() << "error: insufficient argument number: function type should be specified for function '" << fn.getSymName() << "'\n";
-                        success = false;
-                        continue;
-                    }
-
-                    const auto str = mlir::dyn_cast<mlir::StringAttr>(args[0]);
-                    if (!str) {
-                        llvm::errs() << "error: function type should be string (" << fn.getSymName() << ")\n";
-                        success = false;
-                        continue;
-                    }
-
-                    tag = str.getValue();
-
-                } else {
-                    llvm::errs() << "error: unrecognized key '" << key << "' for function '" << fn.getSymName() << "'\n";
-                    success = false;
-                }
-            }
-
-            if (!success) {
-                llvm::errs() << "error: function '" << fn.getSymName() << "' has invalid annotations; couldn't be exported\n";
-                return;
-            }
-
-
-            const auto args = fn.getArguments();
-
-            std::vector<std::string> argNames;
-            argNames.reserve(args.size());
-            fn.getBody().walk([&argNames](mlir::Operation* op) {
-                if (auto alloca = llvm::dyn_cast<cir::AllocaOp>(op); alloca && alloca.getInit()) {
-                    argNames.push_back(alloca.getName().str());
-                }
-            });
-
-            if (args.size() != argNames.size()) {
-                llvm::errs() << "error: invalid function signature for '" << fn.getSymName() << "' (annotation mismatched)\n";
-                return;
-            }
-
-            const auto fnSym = tree.root().insert_inplace(path, tag);
-
-            for (auto iParm = 0; iParm < args.size(); ++iParm) {
-                std::string buffer;
-                llvm::raw_string_ostream os(buffer);
-                args[iParm].getType().print(os);
-                os.flush();
-
-                fnSym
-                    ->children()
-                    .emplace_back("param", argNames[iParm])
-                    .attributes()
-                    .emplace_back("type", buffer);
+            for (const auto adapter : mllif::mlir::Adapters) {
+                adapter->handle(symbols, op);
             }
         });
     }
@@ -170,7 +63,7 @@ auto main(int argc, char **argv) -> int {
         return 1;
     }
 
-    tree.root().print(os);
+    symbols.root().print(os);
 
     return 0;
 }

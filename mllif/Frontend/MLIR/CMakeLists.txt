@@ -5,6 +5,7 @@ file(GLOB_RECURSE HEADERS include/*.*)
 
 add_executable(mllif-mlir ${SOURCES} ${HEADERS})
 target_include_directories(mllif-mlir PUBLIC include)
+target_include_directories(mllif-mlir PRIVATE lib)
 target_precompile_headers(mllif-mlir PUBLIC lib/pch.h)
 set_target_properties(mllif-mlir PROPERTIES
         FRAMEWORK TRUE
