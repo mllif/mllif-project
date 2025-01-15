@@ -2,6 +2,9 @@ project(MLLIFTest LANGUAGES CXX)
 
 file(GLOB_RECURSE SOURCES *.cxx)
 add_mllif_library(MLLIFTest CXX ${SOURCES})
+set_target_properties(MLLIFTest PROPERTIES
+        COMPILE_OPTIONS -std=c++26
+)
 add_dependencies(MLLIFTest MLLIFCFront mllif-mlir)
 
 set_target_properties(MLLIFTest PROPERTIES
