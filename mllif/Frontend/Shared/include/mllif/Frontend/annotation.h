@@ -17,7 +17,7 @@ namespace mllif::shared {
     namespace type {
         constexpr std::string Function = "function";
         constexpr std::string Method = "method";
-    }
+    } // namespace type
 
     /**
      * @brief Annotate a declaration with its information that may be lost

@@ -28,7 +28,7 @@ namespace {
     }
 
     template<typename T>
-    auto Store(const mlir::ArrayAttr& array, std::string from, std::string name, T& container) -> bool {
+    auto Store(const mlir::ArrayAttr& array, const std::string& from, const std::string& name, T& container) -> bool {
         bool success = true;
         for (auto value : array) {
             const auto str = mlir::dyn_cast<mlir::StringAttr>(value);

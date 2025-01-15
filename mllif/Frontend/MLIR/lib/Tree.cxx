@@ -1,6 +1,7 @@
 #include "mllif/Frontend/MLIR/Tree.h"
 
-void mllif::mlir::Node::print(llvm::raw_ostream &os) const {
+// NOLINTNEXTLINE(*-no-recursion)
+auto mllif::mlir::Node::print(llvm::raw_ostream &os) const -> void {
     os << '<' << tag();
 
     if (name().size()) {
@@ -25,14 +26,16 @@ void mllif::mlir::Node::print(llvm::raw_ostream &os) const {
     os << "</" << tag() << '>';
 }
 
-mllif::mlir::Node *mllif::mlir::Node::insert_inplace(std::deque<std::string> &path, const std::string &tag) {
+// NOLINTNEXTLINE(*-no-recursion)
+auto mllif::mlir::Node::insert_inplace(std::deque<std::string> &path, const std::string &tag) -> Node * {
     if (path.empty()) {
         return nullptr;
     }
 
     for (auto &child : children()) {
-        if (const auto p = child.insert(path, tag))
+        if (const auto p = child.insert(path, tag)) {
             return p;
+        }
     }
 
     auto &node = children().emplace_back(path.size() > 1 ? "namespace" : tag, path.front());
@@ -45,7 +48,8 @@ mllif::mlir::Node *mllif::mlir::Node::insert_inplace(std::deque<std::string> &pa
     return p;
 }
 
-mllif::mlir::Node *mllif::mlir::Node::insert(std::deque<std::string> &path, const std::string &tag) {
+// NOLINTNEXTLINE(*-no-recursion)
+auto mllif::mlir::Node::insert(std::deque<std::string> &path, const std::string &tag) -> Node * {
     if (path.empty() || path.front() != name()) {
         return nullptr;
     }

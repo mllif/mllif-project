@@ -37,11 +37,11 @@ mllif::c::ExportAttrInfo::ExportAttrInfo() {
     Spellings = S;
 }
 
-auto mllif::c::ExportAttrInfo::diagAppertainsToDecl(clang::Sema &, const clang::ParsedAttr &, const clang::Decl *D) const -> bool {
+auto mllif::c::ExportAttrInfo::diagAppertainsToDecl(clang::Sema &/**/, const clang::ParsedAttr &/**/, const clang::Decl *D) const -> bool {
     return clang::dyn_cast<clang::FunctionDecl>(D) || clang::dyn_cast<clang::CXXRecordDecl>(D);
 }
 
-auto mllif::c::ExportAttrInfo::diagAppertainsToStmt(clang::Sema &, const clang::ParsedAttr &, const clang::Stmt *) const -> bool {
+auto mllif::c::ExportAttrInfo::diagAppertainsToStmt(clang::Sema &/**/, const clang::ParsedAttr &/**/, const clang::Stmt */**/) const -> bool {
     return false;
 }
 
