@@ -6,23 +6,6 @@
 #include <mllif/Frontend/annotation.h>
 
 namespace {
-    template<typename T>
-    auto Store(const mlir::ArrayAttr& array, const std::string& from, const std::string& name, T& container) -> bool {
-        bool success = true;
-        for (auto value : array) {
-            const auto str = mlir::dyn_cast<mlir::StringAttr>(value);
-            if (!str) {
-                llvm::errs() << "error: " << name << " should be string (" << from << ")\n";
-                success = false;
-                continue;
-            }
-
-            container.emplace_back(str.getValue());
-        }
-
-        return success;
-    }
-
     std::vector<std::string> GetArgNames(cir::FuncOp& fn) {
 
         std::vector<std::string> argNames;
@@ -50,40 +33,31 @@ struct CIRAnnotatedData {
         }
 
         for (auto attr : fn.getAnnotationsAttr()) {
-            auto annotation = mlir::dyn_cast<cir::AnnotationAttr>(attr);
-            if (!annotation) continue;
+            auto annotAttr = mlir::dyn_cast<cir::AnnotationAttr>(attr);
+            if (!annotAttr) continue;
 
-
-            auto key = annotation.getName().getValue();
-            if (!key.starts_with(mllif::shared::Namespace + '.')) {
+            mllif::shared::Annotation annot{ annotAttr.getName().str() };
+            if (!annot.Key.starts_with(mllif::shared::Namespace + '.')) {
                 continue;
             }
-            key = key.substr(mllif::shared::Namespace.size() + 1);
+            annot.Key = annot.Key.substr(mllif::shared::Namespace.size() + 1);
 
             Skip = false;
 
-            if (key == mllif::shared::prefix::Path) {
-                Success &= Store(annotation.getArgs(), fn.getSymName().str(), "path segment", Path);
+            if (annot.Key == mllif::shared::prefix::Path) {
+                Path.assign(annot.Values.begin(), annot.Values.end());
 
-            } else if (key == mllif::shared::prefix::Type) {
-                const auto args = annotation.getArgs().getValue();
-                if (args.size() < 1) {
-                    llvm::errs() << "error: insufficient argument number: function type should be specified for function '" << fn.getSymName() << "'\n";
+            } else if (annot.Key == mllif::shared::prefix::Type) {
+                if (annot.Values.size() != 1) {
+                    llvm::errs() << "error: type of function should be specified once (" << fn.getSymName() << ")\n";
                     Success = false;
                     continue;
                 }
 
-                const auto str = dyn_cast<::mlir::StringAttr>(args[0]);
-                if (!str) {
-                    llvm::errs() << "error: function type should be string (" << fn.getSymName() << ")\n";
-                    Success = false;
-                    continue;
-                }
-
-                Tag = str.getValue();
+                Tag = annot.Values.front();
 
             } else {
-                llvm::errs() << "error: unrecognized key '" << key << "' for function '" << fn.getSymName() << "'\n";
+                llvm::errs() << "error: unrecognized key '" << annot.Key << "' for function '" << fn.getSymName() << "'\n";
                 Success = false;
             }
         }
@@ -121,6 +95,8 @@ void mllif::mlir::cir::CIRAdapter::handle(Tree &symbols, std::shared_ptr<::mlir:
         return;
     }
 
+    auto iParm = 0;
+
     if (annotated.Tag == shared::type::Method) {
         annotated.Path.pop_back();
         const auto parentNode = symbols.root().insert_inplace(annotated.Path, "");
@@ -128,9 +104,12 @@ void mllif::mlir::cir::CIRAdapter::handle(Tree &symbols, std::shared_ptr<::mlir:
 
         // Only object can hold methods
         parentNode->tag() = shared::type::Object;
+
+        // Skip 'this' parameter
+        iParm++;
     }
 
-    for (auto iParm = 0; iParm < args.size(); ++iParm) {
+    for (; iParm < args.size(); ++iParm) {
         auto type = Types::From(args[iParm].getType(), module);
         if (!type) {
             llvm::errs() << "error: unrecognized type '";

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 namespace clang {
     class FunctionDecl;
@@ -20,9 +21,18 @@ namespace mllif::shared {
         constexpr std::string Object = "object";
     } // namespace type
 
+    struct Annotation {
+        std::string Key;
+        std::vector<std::string> Values;
+
+        Annotation(const std::string &annotation);
+    };
+
     /**
      * @brief Annotate a declaration with its information that may be lost
      * @param decl A declaration to be annotated
      */
     void CreateAnnotation(clang::FunctionDecl *decl);
+
+
 } // namespace mllif::shared
