@@ -31,7 +31,7 @@ namespace mllif::mlir::cir {
         CIRType() = default;
 
       public:
-        static auto From(const ::mlir::Type &type, std::shared_ptr<::mlir::ModuleOp> module) -> std::shared_ptr<CIRType>;
+        static auto From(const ::mlir::Type &type, const std::shared_ptr<::mlir::ModuleOp> &module) -> std::shared_ptr<CIRType>;
     };
 
     class CIRBoolType final : public CIRType {

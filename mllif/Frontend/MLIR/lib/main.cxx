@@ -40,7 +40,7 @@ namespace {
     }
 } // namespace
 
-auto main(int argc, char **argv) -> int {
+auto main(const int argc, char **argv) -> int {
     mlir::MLIRContext context;
 
     mlir::DialectRegistry registry;
@@ -65,7 +65,7 @@ auto main(int argc, char **argv) -> int {
                 return;
             }
 
-            for (const auto adapter : mllif::mlir::Adapters) {
+            for (const auto &adapter : mllif::mlir::Adapters) {
                 adapter->handle(symbols, module, op);
             }
         });

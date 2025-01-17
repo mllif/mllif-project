@@ -20,6 +20,7 @@
 
 // Include all type implementations
 #include <mllif/Frontend/MLIR/Builtin/BuiltinType.h>
+#include <mllif/Frontend/MLIR/CIR/CIRType.h>
 
 namespace mllif::mlir {
 

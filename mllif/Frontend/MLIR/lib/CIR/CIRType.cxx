@@ -37,7 +37,7 @@ namespace {
     }
 } // namespace
 
-auto mllif::mlir::cir::CIRType::From(const ::mlir::Type &type, std::shared_ptr<::mlir::ModuleOp> module) -> std::shared_ptr<CIRType> {
+auto mllif::mlir::cir::CIRType::From(const ::mlir::Type &type, const std::shared_ptr<::mlir::ModuleOp> &module) -> std::shared_ptr<CIRType> {
     if (dyn_cast<::cir::BoolType>(type)) {
         return std::make_shared<CIRBoolType>();
     }
@@ -81,31 +81,31 @@ auto mllif::mlir::cir::CIRType::From(const ::mlir::Type &type, std::shared_ptr<:
     return nullptr;
 }
 
-std::string mllif::mlir::cir::CIRBoolType::store(Tree &symbols) const {
+auto mllif::mlir::cir::CIRBoolType::store(Tree &/**/) const -> std::string {
     return "bool";
 }
 
-std::string mllif::mlir::cir::CIRIntegerType::store(Tree &symbols) const {
+auto mllif::mlir::cir::CIRIntegerType::store(Tree &/**/) const -> std::string {
     std::stringstream ss;
     ss << (signed_() ? 's' : 'u') << width();
     return ss.str();
 }
 
-std::string mllif::mlir::cir::CIRFloatType::store(Tree &symbols) const {
+auto mllif::mlir::cir::CIRFloatType::store(Tree &/**/) const -> std::string {
     std::stringstream ss;
     ss << "fp" << width();
     return ss.str();
 }
 
-std::string mllif::mlir::cir::CIRPointerType::store(Tree &symbols) const {
+auto mllif::mlir::cir::CIRPointerType::store(Tree &symbols) const -> std::string {
     std::stringstream ss;
     ss << pointee()->store(symbols) << '*';
     return ss.str();
 }
 
-std::string mllif::mlir::cir::CIRStructType::store(Tree &symbols) const {
+auto mllif::mlir::cir::CIRStructType::store(Tree &symbols) const -> std::string {
     auto copyPath = path();
-    auto symbol = symbols.root().insert_inplace(copyPath, shared::type::Object);
+    const auto symbol = symbols.root().insert_inplace(copyPath, shared::type::Object);
 
     bool sizeSet = false, alignSet = false;
     for (auto &[key, value] : symbol->attributes()) {
@@ -116,10 +116,10 @@ std::string mllif::mlir::cir::CIRStructType::store(Tree &symbols) const {
         }
     }
     if (!sizeSet) {
-        symbol->attributes().push_back(std::make_pair("size", std::to_string(size())));
+        symbol->attributes().emplace_back(std::make_pair("size", std::to_string(size())));
     }
     if (!alignSet) {
-        symbol->attributes().push_back(std::make_pair("align", std::to_string(align())));
+        symbol->attributes().emplace_back(std::make_pair("align", std::to_string(align())));
     }
 
     std::stringstream ss;

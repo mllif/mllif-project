@@ -27,7 +27,7 @@ namespace mllif::mlir::builtin {
 
     class BuiltinType : public Type {
       public:
-        static auto From(const ::mlir::Type &type, std::shared_ptr<::mlir::ModuleOp> module) -> std::shared_ptr<BuiltinType>;
+        static auto From(const ::mlir::Type &type, const std::shared_ptr<::mlir::ModuleOp>& module) -> std::shared_ptr<BuiltinType>;
     };
 
     class BuiltinIntType final : public BuiltinType {

@@ -18,7 +18,7 @@
 
 #include <mllif/Frontend/MLIR/Builtin/BuiltinType.h>
 
-auto mllif::mlir::builtin::BuiltinType::From(const ::mlir::Type &type, std::shared_ptr<::mlir::ModuleOp> /**/) -> std::shared_ptr<BuiltinType> {
+auto mllif::mlir::builtin::BuiltinType::From(const ::mlir::Type &type, const std::shared_ptr<::mlir::ModuleOp>& /**/) -> std::shared_ptr<BuiltinType> {
     if (const auto i = dyn_cast<::mlir::IntegerType>(type)) {
 
         auto sign = i.getSignedness();
@@ -47,13 +47,13 @@ auto mllif::mlir::builtin::BuiltinType::From(const ::mlir::Type &type, std::shar
     return nullptr;
 }
 
-std::string mllif::mlir::builtin::BuiltinIntType::store(Tree &symbols) const {
+std::string mllif::mlir::builtin::BuiltinIntType::store(Tree &/**/) const {
     std::stringstream ss;
     ss << (signed_() ? 's' : 'u') << width();
     return ss.str();
 }
 
-std::string mllif::mlir::builtin::BuiltinFPType::store(Tree &symbols) const {
+std::string mllif::mlir::builtin::BuiltinFPType::store(Tree &/**/) const {
     std::stringstream ss;
     ss << "fp" << width();
     return ss.str();

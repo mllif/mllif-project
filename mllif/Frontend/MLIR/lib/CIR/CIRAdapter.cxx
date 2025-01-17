@@ -22,7 +22,7 @@
 #include <mllif/Frontend/annotation.h>
 
 namespace {
-    std::vector<std::string> GetArgNames(cir::FuncOp &fn) {
+    auto GetArgNames(cir::FuncOp &fn) -> std::vector<std::string> {
 
         std::vector<std::string> argNames;
         argNames.reserve(fn.getNumArguments());
@@ -50,8 +50,9 @@ struct CIRAnnotatedData {
 
         for (auto attr : fn.getAnnotationsAttr()) {
             auto annotAttr = mlir::dyn_cast<cir::AnnotationAttr>(attr);
-            if (!annotAttr)
+            if (!annotAttr) {
                 continue;
+            }
 
             mllif::shared::Annotation annot{annotAttr.getName().str()};
             if (!annot.Key.starts_with(mllif::shared::Namespace + '.')) {
@@ -83,12 +84,14 @@ struct CIRAnnotatedData {
 
 void mllif::mlir::cir::CIRAdapter::handle(Tree &symbols, std::shared_ptr<::mlir::ModuleOp> module, ::mlir::Operation *op) {
     auto fn = dyn_cast<::cir::FuncOp>(op);
-    if (!fn)
+    if (!fn) {
         return;
+    }
 
     CIRAnnotatedData annotated{fn};
-    if (annotated.Skip)
+    if (annotated.Skip) {
         return;
+    }
     if (!annotated.Success) {
         llvm::errs() << "error: function '" << fn.getSymName() << "' has invalid annotations\n";
         return;
@@ -148,5 +151,5 @@ void mllif::mlir::cir::CIRAdapter::handle(Tree &symbols, std::shared_ptr<::mlir:
 
 namespace {
     [[maybe_unused]]
-    mllif::mlir::AdapterRegistry<mllif::mlir::cir::CIRAdapter> X{};
+    const mllif::mlir::AdapterRegistry<mllif::mlir::cir::CIRAdapter> X{};
 }

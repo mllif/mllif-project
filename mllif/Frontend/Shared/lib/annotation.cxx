@@ -87,10 +87,11 @@ mllif::shared::Annotation::Annotation(const std::string &annotation) {
     bool key = true;
     std::stringstream ss{ annotation };
     for (std::string term; std::getline(ss, term, Delimiter); key = false) {
-        if (key)
+        if (key) {
             Key = term;
-        else
+        } else {
             Values.emplace_back(term);
+        }
     }
 }
 
