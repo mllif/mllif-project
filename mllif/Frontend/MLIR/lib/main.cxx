@@ -20,7 +20,7 @@
 #include <mllif/Frontend/annotation.h>
 
 namespace {
-    auto LoadModule(mlir::MLIRContext& context, const std::string& filename) -> std::unique_ptr<mlir::ModuleOp> {
+    auto LoadModule(mlir::MLIRContext &context, const std::string &filename) -> std::unique_ptr<mlir::ModuleOp> {
 
         llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> fileOrErr = llvm::MemoryBuffer::getFile(filename);
         if (const std::error_code ec = fileOrErr.getError()) {
@@ -36,10 +36,9 @@ namespace {
             return nullptr;
         }
 
-
         return std::make_unique<mlir::ModuleOp>(owningModule.release());
     }
-}
+} // namespace
 
 auto main(int argc, char **argv) -> int {
     mlir::MLIRContext context;
@@ -61,7 +60,7 @@ auto main(int argc, char **argv) -> int {
     for (auto i = 2; i < argc; ++i) {
         const std::shared_ptr module = LoadModule(context, std::string(argv[i]));
 
-        module->walk([&module, &symbols](mlir::Operation* op, const mlir::WalkStage& stage) {
+        module->walk([&module, &symbols](mlir::Operation *op, const mlir::WalkStage &stage) {
             if (!stage.isAfterAllRegions()) {
                 return;
             }

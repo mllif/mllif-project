@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#include "mllif/Frontend/MLIR/CIR/CIRType.h"
 #include "pch.h"
 
+#include <mllif/Frontend/MLIR/CIR/CIRType.h>
 #include <mllif/Frontend/annotation.h>
 
 namespace {
@@ -122,9 +122,8 @@ std::string mllif::mlir::cir::CIRStructType::store(Tree &symbols) const {
         symbol->attributes().push_back(std::make_pair("align", std::to_string(align())));
     }
 
-
     std::stringstream ss;
-    for (const auto& term: path()) {
+    for (const auto &term : path()) {
         ss << '/' << term;
     }
     return ss.str();

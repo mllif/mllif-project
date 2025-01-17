@@ -15,8 +15,8 @@
  */
 
 #include "pch.h"
-#include "mllif/Frontend/annotation.h"
-#include "mllif/Frontend/C/ExportAttr.h"
+#include <mllif/Frontend/C/ExportAttr.h>
+#include <mllif/Frontend/annotation.h>
 
 mllif::c::ExportAttrInfo::ExportAttrInfo() {
     // NOTE: `S` should be `static` (experimental proof on Clang/LLVM 20.0)

@@ -39,7 +39,7 @@ namespace mllif::mlir::builtin {
 
         size_t &width() { return _width; }
         size_t width() const { return _width; }
-        bool& signed_() { return _signed; }
+        bool &signed_() { return _signed; }
         bool signed_() const { return _signed; }
 
         std::string store(Tree &symbols) const override;

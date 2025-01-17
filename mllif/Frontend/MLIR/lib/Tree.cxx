@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "mllif/Frontend/MLIR/Tree.h"
+#include <mllif/Frontend/MLIR/Tree.h>
 
 // NOLINTNEXTLINE(*-no-recursion)
 auto mllif::mlir::Node::print(llvm::raw_ostream &os) const -> void {

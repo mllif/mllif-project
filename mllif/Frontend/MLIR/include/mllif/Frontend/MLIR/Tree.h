@@ -84,7 +84,7 @@ namespace mllif::mlir {
          * @brief Gets a name of node
          * @return Name of node
          */
-        std::string& name() { return _name; }
+        std::string &name() { return _name; }
 
         /**
          * @brief Gets a name of node as readonly

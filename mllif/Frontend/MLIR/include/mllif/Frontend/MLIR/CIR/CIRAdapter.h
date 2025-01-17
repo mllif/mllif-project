@@ -25,4 +25,4 @@ namespace mllif::mlir::cir {
         void handle(Tree &symbols, std::shared_ptr<::mlir::ModuleOp> module, ::mlir::Operation *op) override;
     };
 
-}
+} // namespace mllif::mlir::cir

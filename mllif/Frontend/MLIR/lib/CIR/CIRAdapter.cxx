@@ -22,7 +22,7 @@
 #include <mllif/Frontend/annotation.h>
 
 namespace {
-    std::vector<std::string> GetArgNames(cir::FuncOp& fn) {
+    std::vector<std::string> GetArgNames(cir::FuncOp &fn) {
 
         std::vector<std::string> argNames;
         argNames.reserve(fn.getNumArguments());
@@ -35,7 +35,7 @@ namespace {
 
         return argNames;
     }
-}
+} // namespace
 
 struct CIRAnnotatedData {
     std::deque<std::string> Path;
@@ -43,16 +43,17 @@ struct CIRAnnotatedData {
     bool Skip;
     bool Success;
 
-    explicit CIRAnnotatedData(cir::FuncOp& fn) : Skip(true), Success(true) {
+    explicit CIRAnnotatedData(cir::FuncOp &fn) : Skip(true), Success(true) {
         if (const auto annot = fn.getAnnotations(); !annot || annot.value().empty()) {
             return;
         }
 
         for (auto attr : fn.getAnnotationsAttr()) {
             auto annotAttr = mlir::dyn_cast<cir::AnnotationAttr>(attr);
-            if (!annotAttr) continue;
+            if (!annotAttr)
+                continue;
 
-            mllif::shared::Annotation annot{ annotAttr.getName().str() };
+            mllif::shared::Annotation annot{annotAttr.getName().str()};
             if (!annot.Key.starts_with(mllif::shared::Namespace + '.')) {
                 continue;
             }
@@ -82,10 +83,12 @@ struct CIRAnnotatedData {
 
 void mllif::mlir::cir::CIRAdapter::handle(Tree &symbols, std::shared_ptr<::mlir::ModuleOp> module, ::mlir::Operation *op) {
     auto fn = dyn_cast<::cir::FuncOp>(op);
-    if (!fn) return;
+    if (!fn)
+        return;
 
-    CIRAnnotatedData annotated{ fn };
-    if (annotated.Skip) return;
+    CIRAnnotatedData annotated{fn};
+    if (annotated.Skip)
+        return;
     if (!annotated.Success) {
         llvm::errs() << "error: function '" << fn.getSymName() << "' has invalid annotations\n";
         return;

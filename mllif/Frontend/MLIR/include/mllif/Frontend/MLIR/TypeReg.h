@@ -16,17 +16,16 @@
 
 #pragma once
 
-#include "mllif/Frontend/MLIR/Type.h"
+#include <mllif/Frontend/MLIR/Type.h>
 
 // Include all type implementations
-#include "mllif/Frontend/MLIR/Builtin/BuiltinType.h"
-#include "mllif/Frontend/MLIR/CIR/CIRType.h"
+#include <mllif/Frontend/MLIR/Builtin/BuiltinType.h>
 
 namespace mllif::mlir {
 
-    template<typename TInit, typename ...T>
+    template <typename TInit, typename... T>
     class TypeReg {
-    public:
+      public:
         static auto From(const ::mlir::Type &type, std::shared_ptr<::mlir::ModuleOp> module) -> std::shared_ptr<Type> {
             if (auto t = TInit::From(type, module)) {
                 return t;
@@ -40,6 +39,6 @@ namespace mllif::mlir {
 
     // Ignore IDE error - Compilation may success
     using Types = TypeReg<
-#include "mllif/Frontend/MLIR/Types.inc"
+#include <mllif/Frontend/MLIR/Types.inc>
         >;
-}
+} // namespace mllif::mlir
