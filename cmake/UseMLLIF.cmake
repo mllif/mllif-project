@@ -23,7 +23,7 @@ function(add_mllif_library target language)
         add_custom_command(
                 OUTPUT ${LL}
                 COMMAND ${${COMPILER}}
-                -fplugin="${MLLIF_PATH}lib/MLLIFC.so"
+                -fplugin="${MLLIF_PATH}lib/MLLIFCFront.so"
                 -emit-cir
                 $<TARGET_PROPERTY:${target},COMPILE_OPTIONS>
                 "${INPUT}" -o "${CIR}"
