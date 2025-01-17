@@ -53,7 +53,7 @@ auto mllif::c::ExportAttrInfo::handleDeclAttribute(clang::Sema &S, clang::Decl *
             }
         }
     } else if (const auto fn = clang::dyn_cast<clang::FunctionDecl>(D)) {
-        shared::CreateAnnotation(fn); // just mark a symbol to process it later
+        shared::CreateAnnotation(fn);
     } else {
         const auto id = S.Diags.getCustomDiagID(
             clang::DiagnosticsEngine::Warning,
