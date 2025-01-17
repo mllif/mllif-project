@@ -37,15 +37,15 @@ mllif::c::ExportAttrInfo::ExportAttrInfo() {
     Spellings = S;
 }
 
-auto mllif::c::ExportAttrInfo::diagAppertainsToDecl(clang::Sema &/**/, const clang::ParsedAttr &/**/, const clang::Decl *D) const -> bool {
+auto mllif::c::ExportAttrInfo::diagAppertainsToDecl(clang::Sema & /**/, const clang::ParsedAttr & /**/, const clang::Decl *D) const -> bool {
     return clang::dyn_cast<clang::FunctionDecl>(D) || clang::dyn_cast<clang::CXXRecordDecl>(D);
 }
 
-auto mllif::c::ExportAttrInfo::diagAppertainsToStmt(clang::Sema &/**/, const clang::ParsedAttr &/**/, const clang::Stmt */**/) const -> bool {
+auto mllif::c::ExportAttrInfo::diagAppertainsToStmt(clang::Sema & /**/, const clang::ParsedAttr & /**/, const clang::Stmt * /**/) const -> bool {
     return false;
 }
 
-auto mllif::c::ExportAttrInfo::handleDeclAttribute(clang::Sema &S, clang::Decl *D, const clang::ParsedAttr &/**/) const -> AttrHandling {
+auto mllif::c::ExportAttrInfo::handleDeclAttribute(clang::Sema &S, clang::Decl *D, const clang::ParsedAttr & /**/) const -> AttrHandling {
     if (const auto record = clang::dyn_cast<clang::CXXRecordDecl>(D)) {
         for (const auto method : record->methods()) {
             if (method->getVisibility() != clang::Visibility::HiddenVisibility) {
@@ -77,6 +77,6 @@ auto mllif::c::ExportAttrInfo::handleDeclAttribute(clang::Sema &S, clang::Decl *
 
 namespace {
     [[maybe_unused]]
-    //NOLINTNEXTLINE(cert-err58-cpp) : Initialization of 'Y' with static storage duration may throw an exception that cannot be caught
+    // NOLINTNEXTLINE(cert-err58-cpp) : Initialization of 'Y' with static storage duration may throw an exception that cannot be caught
     const clang::ParsedAttrInfoRegistry::Add<mllif::c::ExportAttrInfo> Y("mllif", "");
 }
