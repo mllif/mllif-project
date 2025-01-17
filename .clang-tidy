@@ -1,6 +1,7 @@
 # Generated from CLion Inspection settings
 ---
 Checks: '-*,
+-misc-include-cleaner,
 bugprone-*,
 cert-*,
 cppcoreguidelines-*,
