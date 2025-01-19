@@ -117,6 +117,26 @@ void mllif::mlir::cir::CIRAdapter::handle(Tree &symbols, std::shared_ptr<::mlir:
         return;
     }
 
+    fnSym->attributes().emplace_back(std::make_pair("sym", fn.getSymName()));
+
+    const auto rets = fn.getResultTypes();
+
+    std::string typeStr;
+    if (rets.size() > 0) {
+        auto type = Types::From(rets[0], module);
+        if (!type) {
+            llvm::errs() << "error: unrecognized return type '";
+            rets[0].print(llvm::errs());
+            llvm::errs() << "'\n";
+            return;
+        }
+        typeStr = type->store(symbols);
+    } else {
+        typeStr = "void";
+    }
+
+    fnSym->attributes().emplace_back(std::make_pair("ret", typeStr));
+
     auto iParm = 0;
 
     if (annotated.Tag == shared::type::Method) {
