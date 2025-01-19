@@ -7,9 +7,10 @@ For details, See [docs](https://mllif.sharp0802.com)!
 
 ## 📦 Dependencies
 
-|                      |             Origin              |    Tested on     |
-|:--------------------:|:-------------------------------:|:----------------:|
-| LLVM/Clang (ClangIR) | https://github.com/llvm/clangir | git (2025-01-18) |
+|                      |              Origin               |    Tested on     |
+|:--------------------:|:---------------------------------:|:----------------:|
+| LLVM/Clang (ClangIR) |  https://github.com/llvm/clangir  | git (2025-01-18) |
+|       RapidXML       | https://rapidxml.sourceforge.net/ |       1.13       |
 
 * **Tested on *git*** means it tested with submodule or local-clone of master branch of it
 
