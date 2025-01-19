@@ -5,6 +5,20 @@ with a goal to integrate API of all programming languages.
 
 For details, See [docs](https://mllif.sharp0802.com)!
 
+## 📈 Currently...
+
+|     | Frontend | Backend |
+|:---:|:--------:|:-------:|
+|  C  |    ⚗️    |   📌    |
+| C++ |    ⚗️    |   ⚗️    |
+| C#  |    📌    |   🦺    |
+
+- ✅ : Implemented, tested enough
+- ⚗️ : Implemented, but in experimental state
+- 🦺 : Working in progress
+- 📌 : Planned
+
+
 ## 📦 Dependencies
 
 |                      |              Origin               |    Tested on     |
