@@ -19,6 +19,9 @@
 
 namespace mllif::mlir {
 
+    /**
+     * @brief A wrapper class of `::mlir::Type` that serializes it into simple-and-plain text
+     */
     class Type {
       public:
         virtual ~Type() = default;

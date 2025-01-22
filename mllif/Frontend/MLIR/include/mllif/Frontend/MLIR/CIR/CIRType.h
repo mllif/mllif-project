@@ -25,6 +25,9 @@ namespace mlir {
 
 namespace mllif::mlir::cir {
 
+    /**
+     * @brief Wrapper class for types in CIR dialect to serialize it to simple-and-plain text
+     */
     class CIRType : public Type {
 
       protected:
@@ -34,6 +37,9 @@ namespace mllif::mlir::cir {
         static auto From(const ::mlir::Type &type, const std::shared_ptr<::mlir::ModuleOp> &module) -> std::shared_ptr<CIRType>;
     };
 
+    /**
+     * @brief Wrapper class for boolean in CIR dialect to serialize it to simple-and-plain text
+     */
     class CIRBoolType final : public CIRType {
       public:
         CIRBoolType() = default;
@@ -41,6 +47,9 @@ namespace mllif::mlir::cir {
         std::string store(Tree &symbols) const override;
     };
 
+    /**
+     * @brief Wrapper class for integer types in CIR dialect to serialize it to simple-and-plain text
+     */
     class CIRIntegerType final : public CIRType {
         size_t _width;
         bool _signed;
@@ -56,6 +65,9 @@ namespace mllif::mlir::cir {
         std::string store(Tree &symbols) const override;
     };
 
+    /**
+     * @brief Wrapper class for floating-point types in CIR dialect to serialize it to simple-and-plain text
+     */
     class CIRFloatType final : public CIRType {
         size_t _width;
 
@@ -68,6 +80,9 @@ namespace mllif::mlir::cir {
         std::string store(Tree &symbols) const override;
     };
 
+    /**
+     * @brief Wrapper class for pointer in CIR dialect to serialize it to simple-and-plain text
+     */
     class CIRPointerType final : public CIRType {
         std::shared_ptr<CIRType> _pointee;
 
@@ -80,6 +95,9 @@ namespace mllif::mlir::cir {
         std::string store(Tree &symbols) const override;
     };
 
+    /**
+     * @brief Wrapper class for user-defined structs in CIR dialect to serialize it to simple-and-plain text
+     */
     class CIRStructType final : public CIRType {
         std::deque<std::string> _path;
         size_t _size;

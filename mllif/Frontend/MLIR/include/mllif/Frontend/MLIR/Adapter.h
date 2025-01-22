@@ -20,6 +20,9 @@
 
 namespace mllif::mlir {
 
+    /**
+     * @brief An adapter for each dialect in module. one adapter should match to one dialect, and vice versa. (one-to-one)
+     */
     class Adapter {
       public:
         virtual ~Adapter() = default;
