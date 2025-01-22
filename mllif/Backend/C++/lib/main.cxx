@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "mllif/Backend/C++/Type.h"
 #include "pch.h"
 
 #include <cstring>
@@ -24,50 +25,6 @@ bool Error = false;
 std::ostream& errs() {
     Error = true;
     return std::cerr << "\x1b[0;31merror:\x1b[0m ";
-}
-
-auto TypeToString(std::string type) -> std::string {
-    auto ref = 0;
-    while (type.ends_with('*')) {
-        type.erase(type.size() - 1);
-        ref++;
-    }
-
-    if (type.starts_with('/')) {
-        for (size_t p; (p = type.find('/')) != std::string::npos; ) {
-            type.replace(p, 1, "::");
-        }
-    } else /* built-ins */ {
-        static std::map<std::string, std::string> map = {
-#define T_INT(bit) { "s" #bit , "std::int" #bit "_t" }, { "u" #bit , "std::uint" #bit "_t" }
-            T_INT(8),
-            T_INT(16),
-            T_INT(32),
-            T_INT(64),
-            { "s128", "__int128_t" },
-            { "u128", "__uint128_t" },
-            { "fp16", "_Float16" },
-            { "fp32", "float" },
-            { "fp64", "double" },
-            { "fp128", "__float128" },
-            { "bool", "bool" },
-            { "void", "void" }
-#undef T_INT
-        };
-
-        if (!map.contains(type)) {
-            errs() << "unknown type '" << type << "'" << std::endl;
-            return "<UNKNOWN>";
-        }
-
-        type = map[type];
-    }
-
-    for (auto i = 0; i < ref; i++) {
-        type += '*';
-    }
-
-    return type;
 }
 
 auto Indent(size_t size) -> std::string {
@@ -113,7 +70,7 @@ static std::map<std::string, void (*)(NODE_HANDLER)> Handlers = {
          auto ret = node->first_attribute("ret");
          auto sym = node->first_attribute("sym");
 
-         os << Indent(indent) << TypeToString(ret->value()) << " " << name->value() << "(";
+         os << Indent(indent) << mllif::cxx::AnnotationToCxxType(ret->value()) << " " << name->value() << "(";
          for (auto child = node->first_node(); child; child = child->next_sibling()) {
              Generate(child, os, indent + 1);
              if (child->next_sibling())
@@ -145,7 +102,7 @@ static std::map<std::string, void (*)(NODE_HANDLER)> Handlers = {
          auto name = node->first_attribute("id");
          auto type = node->first_attribute("type");
 
-         os << TypeToString(type->value()) << " " << name->value();
+         os << mllif::cxx::AnnotationToCxxType(type->value()) << " " << name->value();
      }},
 
     {"object", [](NODE_HANDLER) {
