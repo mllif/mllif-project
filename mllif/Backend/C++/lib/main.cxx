@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-#include "mllif/Backend/C++/Type.h"
 #include "pch.h"
 
 #include <cstring>
 #include <memory>
+#include <mllif/Backend/C++/Type.h>
+#include <mllif/Backend/Stdin.h>
 
 bool Error = false;
 
@@ -89,7 +90,7 @@ static std::map<std::string, void (*)(NODE_HANDLER)> Handlers = {
          auto ret = node->first_attribute("ret");
          auto sym = node->first_attribute("sym");
 
-         os << TypeToString(ret->value()) << " " << name->value() << "(";
+         os << mllif::cxx::AnnotationToCxxType(ret->value()) << " " << name->value() << "(";
          for (auto child = node->first_node(); child; child = child->next_sibling()) {
              Generate(child, os, indent + 1);
              if (child->next_sibling())
@@ -145,10 +146,7 @@ auto Generate(rapidxml::xml_node<> *node, std::ostream &os, size_t indent = 0) -
 }
 
 auto main() -> int {
-    std::vector<char> msm;
-    for (char c; std::cin.get(c); ) {
-        msm.push_back(c);
-    }
+    auto msm = mllif::Stdin::ReadToEnd();
 
     rapidxml::xml_document<> doc;
     doc.parse<0>(msm.data());
