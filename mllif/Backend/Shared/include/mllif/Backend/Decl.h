@@ -46,6 +46,7 @@ namespace mllif {
         virtual ~Decl() = default;
 
         const std::string& name() const;
+        const std::vector<std::shared_ptr<Decl>>& children() const { return _children; }
 
         static std::shared_ptr<Decl> Create(MLLIFContext& context, rapidxml::xml_node<> *node);
     };
