@@ -50,6 +50,8 @@ namespace mllif {
         MLLIF_GEN_HANDLER(Method, End) { return handleFunctionEnd(context, node, out, indent); }
         MLLIF_GEN_HANDLER(Param) = 0;
 
+        virtual void writeParamDelimiter(std::ostream& os) = 0;
+
 #undef MLLIF_GEN_HANDLER
 
         bool handleDecl(MLLIFContext& context, const std::shared_ptr<Decl> &node, std::ostream& out, std::size_t indent);

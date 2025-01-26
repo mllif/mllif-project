@@ -30,6 +30,8 @@ namespace mllif {
         std::vector<Error> _errors;
 
       public:
+        const std::vector<Error>& errors() const { return _errors; }
+
         void error(const std::string& what) {
             _errors.push_back(Error(what));
         }

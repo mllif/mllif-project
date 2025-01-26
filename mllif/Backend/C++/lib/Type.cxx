@@ -16,20 +16,10 @@
 
 #include <mllif/Backend/C++/Type.h>
 
-extern std::ostream& errs();
+std::optional<std::string> mllif::cxx::TypeToCxx(const Type& type) {
+    std::stringstream ss;
 
-std::string mllif::cxx::AnnotationToCxxType(std::string annotation) {
-    auto ref = 0;
-    while (annotation.ends_with('*')) {
-        annotation.erase(annotation.size() - 1);
-        ref++;
-    }
-
-    if (annotation.starts_with('/')) {
-        for (size_t p; (p = annotation.find('/')) != std::string::npos; ) {
-            annotation.replace(p, 1, "::");
-        }
-    } else /* built-ins */ {
+    if (type.builtin()) {
         static std::map<std::string, std::string> map = {
 #define T_INT(bit) { "s" #bit , "std::int" #bit "_t" }, { "u" #bit , "std::uint" #bit "_t" }
             T_INT(8),
@@ -47,17 +37,18 @@ std::string mllif::cxx::AnnotationToCxxType(std::string annotation) {
 #undef T_INT
         };
 
-        if (!map.contains(annotation)) {
-            errs() << "unknown type '" << annotation << "'" << std::endl;
-            return "<UNKNOWN>";
+        if (!map.contains(type.terms()[0])) {
+            return std::nullopt;
         }
 
-        annotation = map[annotation];
+        ss << map[type.terms()[0]];
+    } else {
+        for (const auto& term : type.terms()) {
+            ss << "::" << term;
+        }
     }
 
-    for (auto i = 0; i < ref; i++) {
-        annotation += '*';
-    }
+    ss << std::string(type.refs(), '*');
 
-    return annotation;
+    return ss.str();
 }

@@ -40,25 +40,27 @@ namespace mllif {
     class Decl {
         std::string _name;
         std::vector<std::shared_ptr<Decl>> _children;
+        std::shared_ptr<Decl> _parent;
 
       public:
-        Decl(MLLIFContext& context, const rapidxml::xml_node<> *node);
+        Decl(MLLIFContext& context, const rapidxml::xml_node<> *node, std::shared_ptr<Decl> parent);
         virtual ~Decl() = default;
 
-        const std::string& name() const;
+        const std::string& name() const { return _name; }
         const std::vector<std::shared_ptr<Decl>>& children() const { return _children; }
+        const std::shared_ptr<Decl>& parent() const { return _parent; }
 
-        static std::shared_ptr<Decl> Create(MLLIFContext& context, rapidxml::xml_node<> *node);
+        static std::shared_ptr<Decl> Create(MLLIFContext& context, rapidxml::xml_node<> *node, std::shared_ptr<Decl> parent);
     };
 
     class AssemblyDecl final : public Decl {
       public:
-        AssemblyDecl(MLLIFContext& context, const rapidxml::xml_node<> *node) : Decl(context, node) {};
+        AssemblyDecl(MLLIFContext& context, const rapidxml::xml_node<> *node, std::shared_ptr<Decl> parent) : Decl(context, node, parent) {};
     };
 
     class NamespaceDecl final : public Decl {
       public:
-        NamespaceDecl(MLLIFContext& context, const rapidxml::xml_node<> *node) : Decl(context, node) {};
+        NamespaceDecl(MLLIFContext& context, const rapidxml::xml_node<> *node, std::shared_ptr<Decl> parent) : Decl(context, node, parent) {};
     };
 
     class ObjectDecl final : public Decl {
@@ -66,7 +68,7 @@ namespace mllif {
         std::string _align;
 
       public:
-        ObjectDecl(MLLIFContext& context, const rapidxml::xml_node<> *node);
+        ObjectDecl(MLLIFContext& context, const rapidxml::xml_node<> *node, std::shared_ptr<Decl> parent);
 
         const std::string& size() const { return _size; }
         const std::string& align() const { return _align; }
@@ -77,7 +79,7 @@ namespace mllif {
         std::string _symbol;
 
       public:
-        FunctionDecl(MLLIFContext& context, const rapidxml::xml_node<> *node);
+        FunctionDecl(MLLIFContext& context, const rapidxml::xml_node<> *node, std::shared_ptr<Decl> parent);
 
         const Type& returns() const { return _returns; }
         const std::string& symbol() const { return _symbol; }
@@ -85,14 +87,14 @@ namespace mllif {
 
     class MethodDecl final : public FunctionDecl {
       public:
-        MethodDecl(MLLIFContext& context, const rapidxml::xml_node<> *node) : FunctionDecl(context, node) {};
+        MethodDecl(MLLIFContext& context, const rapidxml::xml_node<> *node, std::shared_ptr<Decl> parent) : FunctionDecl(context, node, parent) {};
     };
 
     class ParamDecl final : public Decl {
         Type _type;
 
       public:
-        ParamDecl(MLLIFContext& context, const rapidxml::xml_node<> *node);
+        ParamDecl(MLLIFContext& context, const rapidxml::xml_node<> *node, std::shared_ptr<Decl> parent);
 
         const Type& type() const { return _type; }
     };

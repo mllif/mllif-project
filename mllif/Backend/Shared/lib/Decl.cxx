@@ -39,19 +39,19 @@ mllif::Type::Type(MLLIFContext &context, std::string name) : _refs(0) {
     }
 }
 
-mllif::Decl::Decl(MLLIFContext &context, const rapidxml::xml_node<> *node) {
+mllif::Decl::Decl(MLLIFContext &context, const rapidxml::xml_node<> *node, std::shared_ptr<Decl> parent) : _parent(parent) {
     const auto name = node->first_attribute("id");
     if (!name) {
         context.error("identifier missing in declaration");
         return;
     }
 
-    _name = name;
+    _name = name->value();
 }
 
-std::shared_ptr<mllif::Decl> mllif::Decl::Create(MLLIFContext &context, rapidxml::xml_node<> *node) {
-#define NODE_HANDLER MLLIFContext &context, rapidxml::xml_node<> *node
-#define NODE_INIT(t) [](NODE_HANDLER) -> std::shared_ptr<Decl> { return std::make_shared<t##Decl>(context, node); }
+std::shared_ptr<mllif::Decl> mllif::Decl::Create(MLLIFContext &context, rapidxml::xml_node<> *node, std::shared_ptr<Decl> parent) {
+#define NODE_HANDLER MLLIFContext &context, rapidxml::xml_node<> *node, std::shared_ptr<Decl> parent
+#define NODE_INIT(t) [](NODE_HANDLER) -> std::shared_ptr<Decl> { return std::make_shared<t##Decl>(context, node, parent); }
     std::map<std::string, std::shared_ptr<Decl> (*)(NODE_HANDLER)> handlers = {
         {"assembly", NODE_INIT(Assembly)},
         {"assembly", NODE_INIT(Namespace)},
@@ -67,19 +67,19 @@ std::shared_ptr<mllif::Decl> mllif::Decl::Create(MLLIFContext &context, rapidxml
         return nullptr;
     }
 
-    auto decl = handlers[node->value()](context, node);
+    auto decl = handlers[node->value()](context, node, parent);
     if (!context) {
         return decl;
     }
 
     for (auto child = node->first_node(); child; child = child->next_sibling()) {
-        decl->_children.push_back(Create(context, child));
+        decl->_children.push_back(Create(context, child, parent));
     }
 
     return decl;
 }
 
-mllif::ObjectDecl::ObjectDecl(MLLIFContext &context, const rapidxml::xml_node<> *node) : Decl(context, node) {
+mllif::ObjectDecl::ObjectDecl(MLLIFContext &context, const rapidxml::xml_node<> *node, std::shared_ptr<Decl> parent) : Decl(context, node, parent) {
     const auto size = node->first_attribute("size");
     const auto align = node->first_attribute("align");
 
@@ -97,7 +97,7 @@ mllif::ObjectDecl::ObjectDecl(MLLIFContext &context, const rapidxml::xml_node<> 
     _align = align->value();
 }
 
-mllif::FunctionDecl::FunctionDecl(MLLIFContext &context, const rapidxml::xml_node<> *node) : Decl(context, node) {
+mllif::FunctionDecl::FunctionDecl(MLLIFContext &context, const rapidxml::xml_node<> *node, std::shared_ptr<Decl> parent) : Decl(context, node, parent) {
     const auto returns = node->first_attribute("ret");
     const auto sym = node->first_attribute("sym");
 
@@ -115,7 +115,7 @@ mllif::FunctionDecl::FunctionDecl(MLLIFContext &context, const rapidxml::xml_nod
     _symbol = sym->value();
 }
 
-mllif::ParamDecl::ParamDecl(MLLIFContext &context, const rapidxml::xml_node<> *node) : Decl(context, node) {
+mllif::ParamDecl::ParamDecl(MLLIFContext &context, const rapidxml::xml_node<> *node, std::shared_ptr<Decl> parent) : Decl(context, node, parent) {
     const auto type = node->first_attribute("type");
     if (!type) {
         context.error(std::format("type missing for parameter '{}'", name()));

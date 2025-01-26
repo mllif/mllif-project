@@ -16,14 +16,15 @@
 
 #pragma once
 
+#include <mllif/Backend/Decl.h>
 #include <string>
 
 namespace mllif::cxx {
     /**
-     * @brief Gets C++-compliant typename of type annotation
-     * @param annotation Annotation string
+     * @brief Gets C++-compliant typename of type
+     * @param type Type to convert
      * @return C++-compliant typename
-     * @retval `std::nullopt` if annotation string represents unrecognized type
+     * @retval `std::nullopt` if type represents unrecognized type
      */
-    std::string AnnotationToCxxType(std::string annotation);
+    std::optional<std::string> TypeToCxx(const Type& type);
 }
