@@ -16,6 +16,7 @@
 
 #include "pch.h"
 
+#include <cstring>
 #include <mllif/Backend/Context.h>
 #include <mllif/Backend/Decl.h>
 
@@ -42,6 +43,11 @@ mllif::Type::Type(MLLIFContext &context, std::string name) : _refs(0) {
 }
 
 mllif::Decl::Decl(MLLIFContext &context, const rapidxml::xml_node<> *node, std::shared_ptr<Decl> parent) : _parent(parent) {
+    if (strcmp(node->name(), "assembly") == 0) {
+        _name = "";
+        return;
+    }
+
     const auto name = node->first_attribute("id");
     if (!name) {
         context.error("identifier missing in declaration");
