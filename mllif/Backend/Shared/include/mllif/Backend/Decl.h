@@ -26,7 +26,7 @@ namespace mllif {
     class Type {
         std::vector<std::string> _terms;
         std::size_t _refs;
-        bool _builtin;
+        bool _builtin = false;
 
       public:
         Type() = default;
