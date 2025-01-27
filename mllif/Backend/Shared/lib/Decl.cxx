@@ -56,11 +56,11 @@ std::shared_ptr<mllif::Decl> mllif::Decl::Create(MLLIFContext &context, rapidxml
 #define NODE_INIT(t) [](NODE_HANDLER) -> std::shared_ptr<Decl> { return std::make_shared<t##Decl>(context, node, parent); }
     std::map<std::string, std::shared_ptr<Decl> (*)(NODE_HANDLER)> handlers = {
         {"assembly", NODE_INIT(Assembly)},
-        {"assembly", NODE_INIT(Namespace)},
-        {"assembly", NODE_INIT(Object)},
-        {"assembly", NODE_INIT(Method)},
-        {"assembly", NODE_INIT(Function)},
-        {"assembly", NODE_INIT(Param)}
+        {"namespace", NODE_INIT(Namespace)},
+        {"object", NODE_INIT(Object)},
+        {"method", NODE_INIT(Method)},
+        {"function", NODE_INIT(Function)},
+        {"param", NODE_INIT(Param)}
     };
 #undef NODE_INIT
 #undef NODE_HANDLER
