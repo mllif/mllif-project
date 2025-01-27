@@ -94,18 +94,8 @@ mllif::ObjectDecl::ObjectDecl(MLLIFContext &context, const rapidxml::xml_node<> 
     const auto size = node->first_attribute("size");
     const auto align = node->first_attribute("align");
 
-    if (!size) {
-        context.error(std::format("size missing for object '{}'", name()));
-    }
-    if (!align) {
-        context.error(std::format("align missing for object '{}'", name()));
-    }
-    if (!size || !align) {
-        return;
-    }
-
-    _size = size->value();
-    _align = align->value();
+    _size = size ? size->value() : "1";
+    _align = align ? align->value() : "1";
 }
 
 mllif::FunctionDecl::FunctionDecl(MLLIFContext &context, const rapidxml::xml_node<> *node, std::shared_ptr<Decl> parent) : Decl(context, node, parent) {
