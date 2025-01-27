@@ -37,7 +37,7 @@ function(add_mllif_library target language)
             COMMAND clang -shared $<TARGET_PROPERTY:${target},LINK_OPTIONS> ${LLS}
             -o "$<TARGET_PROPERTY:${target},LIBRARY_OUTPUT_DIRECTORY>/$<TARGET_PROPERTY:${target},PREFIX>${target}$<TARGET_PROPERTY:${target},SUFFIX>"
             COMMAND mllif-mlir
-            "$<TARGET_GENEX_EVAL:MLLIFTest,$<TARGET_PROPERTY:MLLIFTest,TARGET_MSM_FILE>>"
+            "$<TARGET_GENEX_EVAL:${target},$<TARGET_PROPERTY:${target},TARGET_MSM_FILE>>"
             ${CIRS}
             DEPENDS ${LLS}
     )
