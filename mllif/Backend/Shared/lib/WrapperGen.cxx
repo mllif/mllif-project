@@ -19,7 +19,7 @@
 
 bool mllif::WrapperGen::handleDecl(MLLIFContext &context, const std::shared_ptr<Decl> &node, std::ostream &out, std::size_t indent) {
 #define CHILD_OF(t) std::dynamic_pointer_cast<t##Decl>(child)
-#define NESTED_DECL(t, cond, msg, ...)                                \
+#define NESTED_DECL(t, cond, msg, I, ...)                             \
     if (const auto decl = std::dynamic_pointer_cast<t##Decl>(node)) { \
         if (!handle##t##Begin(context, *decl, out, indent)) {         \
             return false;                                             \
@@ -31,30 +31,29 @@ bool mllif::WrapperGen::handleDecl(MLLIFContext &context, const std::shared_ptr<
                 context.error(msg);                                   \
                 break;                                                \
             }                                                         \
-            if (!handleDecl(context, child, out, indent + 1)) {       \
+            if (!handleDecl(context, child, out, indent + 1 + I)) {   \
                 break;                                                \
             }                                                         \
             __VA_ARGS__                                               \
         }                                                             \
                                                                       \
-        if (!handle##t##End(context, *decl, out, indent + 1)) {       \
+        if (!handle##t##End(context, *decl, out, indent)) {           \
             return false;                                             \
         }                                                             \
     }
 
-    NESTED_DECL(Assembly, false, "")
-    NESTED_DECL(Namespace, CHILD_OF(Assembly), "AssemblyDecl cannot be the child of NamespaceDecl")
-    NESTED_DECL(Object, CHILD_OF(Namespace) || CHILD_OF(Assembly), "AssemblyDecl or NamespaceDecl cannot be the child of ObjectDecl")
-    NESTED_DECL(
-        Function, !CHILD_OF(Param),
-        "Only ParamDecl can be the child of FunctionDecl",
-        if (i == decl->children().size() - 1) { writeParamDelimiter(out); })
-    NESTED_DECL(
+    NESTED_DECL(Assembly, false, "", -1)
+    else NESTED_DECL(Namespace, CHILD_OF(Assembly), "AssemblyDecl cannot be the child of NamespaceDecl", 0)
+    else NESTED_DECL(Object, CHILD_OF(Namespace) || CHILD_OF(Assembly), "AssemblyDecl or NamespaceDecl cannot be the child of ObjectDecl", 0)
+    else NESTED_DECL(
         Method, !CHILD_OF(Param),
-        "Only ParamDecl can be the child of MethodDecl",
-        if (i == decl->children().size() - 1) { writeParamDelimiter(out); })
-
-    if (const auto decl = std::dynamic_pointer_cast<ParamDecl>(node)) {
+        "Only ParamDecl can be the child of MethodDecl", 0,
+        if (i != decl->children().size() - 1) { writeParamDelimiter(out); })
+    else NESTED_DECL(
+        Function, !CHILD_OF(Param),
+        "Only ParamDecl can be the child of FunctionDecl", 0,
+        if (i != decl->children().size() - 1) { writeParamDelimiter(out); })
+    else if (const auto decl = std::dynamic_pointer_cast<ParamDecl>(node)) {
         if (!handleParam(context, *decl, out, indent)) {
             return false;
         }
