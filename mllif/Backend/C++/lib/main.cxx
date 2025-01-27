@@ -17,6 +17,7 @@
 #include "pch.h"
 
 #include <memory>
+#include <mllif/Backend/C++/CxxDeclGen.h>
 #include <mllif/Backend/C++/CxxWrapperGen.h>
 #include <mllif/Backend/C++/Type.h>
 #include <mllif/Backend/Context.h>
@@ -39,17 +40,30 @@ auto main() -> int {
     const auto root = mllif::Decl::Create(context, doc.first_node(), nullptr);
 
     if (!context) {
-        PrintErrors(context);
-        return EXIT_FAILURE;
+        goto ERROR;
     }
 
-    mllif::cxx::CxxWrapperGen gen;
-    gen.handleDecl(context, root, std::cout, 0);
+    {
+        mllif::cxx::CxxDeclGen declGen;
+        declGen.handleDecl(context, root, std::cout, 0);
 
-    if (!context) {
-        PrintErrors(context);
-        return EXIT_FAILURE;
+        if (!context) {
+            goto ERROR;
+        }
+    }
+
+    {
+        mllif::cxx::CxxWrapperGen wrapperGen;
+        wrapperGen.handleDecl(context, root, std::cout, 0);
+
+        if (!context) {
+            goto ERROR;
+        }
     }
 
     return EXIT_SUCCESS;
+
+ERROR:
+    PrintErrors(context);
+    return EXIT_FAILURE;
 }

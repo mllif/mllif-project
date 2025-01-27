@@ -16,12 +16,12 @@
 
 #pragma once
 
-#include <fstream>
-#include <iostream>
-#include <vector>
-#include <map>
-#include <set>
-#include <cstring>
+#include <mllif/Backend/C++/CxxWrapperGen.h>
 
-#include <rapidxml/rapidxml.hpp>
-#include <rapidxml/rapidxml_print.hpp>
+namespace mllif::cxx {
+    class CxxDeclGen final : public CxxWrapperGen {
+      public:
+        bool handleAssemblyBegin(MLLIFContext &context, const AssemblyDecl &node, std::ostream &out, std::size_t indent) override;
+        bool handleObjectBegin(MLLIFContext &context, const ObjectDecl &node, std::ostream &out, std::size_t indent) override;
+    };
+}

@@ -20,7 +20,7 @@
 #include <mllif/Backend/WrapperGen.h>
 
 namespace mllif::cxx {
-    class CxxWrapperGen final : public WrapperGen {
+    class CxxWrapperGen : public WrapperGen {
       public:
         bool handleAssemblyBegin(MLLIFContext &context, const AssemblyDecl &node, std::ostream &out, std::size_t indent) override;
         bool handleAssemblyEnd(MLLIFContext &context, const AssemblyDecl &node, std::ostream &out, std::size_t indent) override;
