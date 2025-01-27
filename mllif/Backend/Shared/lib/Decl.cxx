@@ -24,8 +24,10 @@ mllif::Type::Type(MLLIFContext &context, std::string name) : _refs(0) {
         name.erase(name.size() - 1);
         _refs++;
     }
-
-    context.error("identifier cannot contains '*' in middle of itself");
+    if (name.contains('*')) {
+        context.error("identifier cannot contain '*' in middle of itself");
+        return;
+    }
 
     if (name.starts_with('/')) {
         name.erase(0, 1);
