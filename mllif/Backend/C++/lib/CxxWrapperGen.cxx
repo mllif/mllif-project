@@ -72,7 +72,7 @@ bool mllif::cxx::CxxWrapperGen::handleFunctionBegin(MLLIFContext &context, const
 }
 
 bool mllif::cxx::CxxWrapperGen::handleFunctionEnd(MLLIFContext &context, const FunctionDecl &node, std::ostream &out, std::size_t indent) {
-    out << ") asm(" << node.symbol() << ");\n";
+    out << ") asm(\"" << node.symbol() << "\");\n";
     return true;
 }
 
