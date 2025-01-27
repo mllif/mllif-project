@@ -81,6 +81,7 @@ bool mllif::cxx::CxxWrapperGen::handleFunctionEnd(MLLIFContext &context, const F
 bool mllif::cxx::CxxWrapperGen::handleMethodBegin(MLLIFContext &context, const MethodDecl &node, std::ostream &out, std::size_t indent) {
     const auto ret = TypeToCxx(node.returns());
     if (!ret) {
+        context.error(std::format("unrecognized builtin type '{}'", node.returns().terms()[0]));
         return false;
     }
 
@@ -91,6 +92,7 @@ bool mllif::cxx::CxxWrapperGen::handleMethodBegin(MLLIFContext &context, const M
 bool mllif::cxx::CxxWrapperGen::handleParam(MLLIFContext &context, const ParamDecl &node, std::ostream &out, std::size_t indent) {
     const auto type = TypeToCxx(node.type());
     if (!type) {
+        context.error(std::format("unrecognized builtin type '{}'", node.type().terms()[0]));
         return false;
     }
 
