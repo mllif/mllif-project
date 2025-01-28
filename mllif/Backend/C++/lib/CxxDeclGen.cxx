@@ -26,6 +26,7 @@ bool mllif::cxx::CxxDeclGen::handleAssemblyBegin(MLLIFContext &context, const As
            "#include <cstdint>\n";
     return true;
 }
+
 bool mllif::cxx::CxxDeclGen::handleObjectBegin(MLLIFContext &context, const ObjectDecl &node, std::ostream &out, std::size_t indent) {
 
     out << Indent(indent) << "class " << node.name() << ";\n";

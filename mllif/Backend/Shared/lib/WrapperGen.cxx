@@ -29,10 +29,10 @@ bool mllif::WrapperGen::handleDecl(MLLIFContext &context, const std::shared_ptr<
             auto &child = decl->children()[i];                        \
             if (cond) {                                               \
                 context.error(msg);                                   \
-                break;                                                \
+                continue;                                             \
             }                                                         \
             if (!handleDecl(context, child, out, indent + 1 + I)) {   \
-                break;                                                \
+                continue;                                             \
             }                                                         \
             __VA_ARGS__                                               \
         }                                                             \
