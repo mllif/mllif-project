@@ -56,7 +56,7 @@ set_target_properties(MyProject PROPERTIES
 )
 ```
 
-> [!WARN]
+> [!WARNING]
 > You cannot edit compile-option of it with `target_compile_options...` or `CMAKE_CXX_STANDARD` things!
 > It's because `add_mllif_library` is implemented with `add_custom_target`.
 > If you know how to interoperates them, Please make Pull Request!!!
