@@ -34,7 +34,7 @@ target name, language id, source files:
 add_mllif_library(<target> <language> <sources>)
 ```
 
-> [!WARN]
+> [!WARNING]
 > For C programs, Using CXX as language id is forced.
 > Of course, You don't have to change any line of code.
 > Just use CXX for your language id!
