@@ -12,3 +12,5 @@ set_target_properties(mllif-cs PROPERTIES
         FRAMEWORK TRUE
         PUBLIC_HEADER "${HEADERS}"
 )
+
+add_subdirectory(test)
