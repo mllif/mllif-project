@@ -14,6 +14,64 @@
  * limitations under the License.
  */
 
-int main() {
-    return 0;
+#include "pch.h"
+
+#include <cstring>
+#include <memory>
+#include <mllif/Backend/C#/CsWrapperGen.h>
+#include <mllif/Backend/Context.h>
+#include <mllif/Backend/Decl.h>
+#include <mllif/Backend/Stdin.h>
+
+static void PrintErrors(const mllif::MLLIFContext &context) {
+    for (auto error : context.errors()) {
+        std::cerr << "\x1b[0;31merror\x1b[0m: " << error.what() << std::endl;
+    }
+}
+
+static void PrintHelp() {
+    std::cout << "syntax: mllif-cs <library-name>"
+              << "usage: mllif-cs mylib.so < mylib.msm > mylib.cs";
+}
+
+auto main(int argc, char *argv[]) -> int {
+    mllif::MLLIFContext context;
+    std::vector<char> msm;
+    rapidxml::xml_document<> doc;
+    std::shared_ptr<mllif::Decl> root;
+
+    if (argc < 2) {
+        context.error("missing library name; see help");
+        goto ERROR;
+    }
+
+    if (strcmp(argv[1], "--help") == 0 ||
+        strcmp(argv[1], "-h") == 0) {
+        PrintHelp();
+        return EXIT_SUCCESS;
+    }
+
+    msm = mllif::Stdin::ReadToEnd();
+    doc.parse<0>(msm.data());
+
+    root = mllif::Decl::Create(context, doc.first_node(), nullptr);
+
+    if (!context) {
+        goto ERROR;
+    }
+
+    {
+        mllif::cs::CsWrapperGen wrapperGen(argv[1]);
+        wrapperGen.handleDecl(context, root, std::cout, 0);
+
+        if (!context) {
+            goto ERROR;
+        }
+    }
+
+    return EXIT_SUCCESS;
+
+    ERROR:
+        PrintErrors(context);
+    return EXIT_FAILURE;
 }
