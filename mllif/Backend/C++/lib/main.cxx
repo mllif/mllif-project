@@ -17,8 +17,8 @@
 #include "pch.h"
 
 #include <memory>
+#include <mllif/Backend/C++/CxxBridgeGen.h>
 #include <mllif/Backend/C++/CxxDeclGen.h>
-#include <mllif/Backend/C++/CxxWrapperGen.h>
 #include <mllif/Backend/C++/Type.h>
 #include <mllif/Backend/Context.h>
 #include <mllif/Backend/Decl.h>
@@ -53,7 +53,7 @@ auto main() -> int {
     }
 
     {
-        mllif::cxx::CxxWrapperGen wrapperGen;
+        mllif::cxx::CxxBridgeGen wrapperGen;
         wrapperGen.handleDecl(context, root, std::cout, 0);
 
         if (!context) {

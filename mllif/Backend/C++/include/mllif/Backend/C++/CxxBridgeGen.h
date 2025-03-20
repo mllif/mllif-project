@@ -1,5 +1,5 @@
 /*
- * Copyright  Yeong-won Seo
+ * Copyright 2025 Yeong-won Seo
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,12 @@
 
 #pragma once
 
-#include <mllif/Backend/WrapperGen.h>
+#include <memory>
+#include <mllif/Backend/BridgeGen.h>
 
-namespace mllif::cs {
-    class CsWrapperGen final : public WrapperGen {
+namespace mllif::cxx {
+    class CxxBridgeGen : public BridgeGen {
       public:
-        std::string LibraryName;
-
-        CsWrapperGen(const std::string& libname);
-
         bool handleAssemblyBegin(MLLIFContext &context, const AssemblyDecl &node, std::ostream &out, std::size_t indent) override;
         bool handleAssemblyEnd(MLLIFContext &context, const AssemblyDecl &node, std::ostream &out, std::size_t indent) override;
         bool handleNamespaceBegin(MLLIFContext &context, const NamespaceDecl &node, std::ostream &out, std::size_t indent) override;
@@ -37,4 +34,4 @@ namespace mllif::cs {
         bool handleParam(MLLIFContext &context, const ParamDecl &node, std::ostream &out, std::size_t indent) override;
         void writeParamDelimiter(std::ostream &os) override;
     };
-} // namespace mllif::cs
+} // namespace mllif::cxx

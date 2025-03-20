@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+#include <mllif/Backend/BridgeGen.h>
 #include <mllif/Backend/Context.h>
-#include <mllif/Backend/WrapperGen.h>
 
-bool mllif::WrapperGen::handleDecl(MLLIFContext &context, const std::shared_ptr<Decl> &node, std::ostream &out, std::size_t indent) {
+bool mllif::BridgeGen::handleDecl(MLLIFContext &context, const std::shared_ptr<Decl> &node, std::ostream &out, std::size_t indent) {
 #define CHILD_OF(t) std::dynamic_pointer_cast<t##Decl>(child)
 #define NESTED_DECL(t, cond, msg, I, ...)                             \
     if (const auto decl = std::dynamic_pointer_cast<t##Decl>(node)) { \

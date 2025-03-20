@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <mllif/Backend/C#/CsWrapperGen.h>
+#include <mllif/Backend/C#/CsBridgeGen.h>
 #include <mllif/Backend/C#/Type.h>
 #include <mllif/Backend/Context.h>
 
@@ -26,34 +26,34 @@ namespace mllif {
 } // namespace mllif
 
 namespace mllif::cs {
-    CsWrapperGen::CsWrapperGen(const std::string &libname) : LibraryName(libname) {
+    CsBridgeGen::CsBridgeGen(const std::string &libname) : LibraryName(libname) {
     }
 
-    bool CsWrapperGen::handleAssemblyBegin(MLLIFContext &context, const AssemblyDecl &node, std::ostream &out, std::size_t indent) {
+    bool CsBridgeGen::handleAssemblyBegin(MLLIFContext &context, const AssemblyDecl &node, std::ostream &out, std::size_t indent) {
         return true;
     }
-    bool CsWrapperGen::handleAssemblyEnd(MLLIFContext &context, const AssemblyDecl &node, std::ostream &out, std::size_t indent) {
+    bool CsBridgeGen::handleAssemblyEnd(MLLIFContext &context, const AssemblyDecl &node, std::ostream &out, std::size_t indent) {
         return true;
     }
-    bool CsWrapperGen::handleNamespaceBegin(MLLIFContext &context, const NamespaceDecl &node, std::ostream &out, std::size_t indent) {
+    bool CsBridgeGen::handleNamespaceBegin(MLLIFContext &context, const NamespaceDecl &node, std::ostream &out, std::size_t indent) {
         out << Indent(indent) << "namespace " << node.name() << " {\n";
         return true;
     }
-    bool CsWrapperGen::handleNamespaceEnd(MLLIFContext &context, const NamespaceDecl &node, std::ostream &out, std::size_t indent) {
+    bool CsBridgeGen::handleNamespaceEnd(MLLIFContext &context, const NamespaceDecl &node, std::ostream &out, std::size_t indent) {
         out << Indent(indent) << "} // namespace " << node.name() << '\n';
         return true;
     }
-    bool CsWrapperGen::handleObjectBegin(MLLIFContext &context, const ObjectDecl &node, std::ostream &out, std::size_t indent) {
+    bool CsBridgeGen::handleObjectBegin(MLLIFContext &context, const ObjectDecl &node, std::ostream &out, std::size_t indent) {
         out << Indent(indent) << "[System.Runtime.InteropServices.StructLayout(LayoutKind.Explicit, Size=" << node.size() << ", Pack=" << node.align() << ")]\n"
             << Indent(indent) << "public struct " << node.name() << " {\n";
         return true;
     }
-    bool CsWrapperGen::handleObjectEnd(MLLIFContext &context, const ObjectDecl &node, std::ostream &out, std::size_t indent) {
+    bool CsBridgeGen::handleObjectEnd(MLLIFContext &context, const ObjectDecl &node, std::ostream &out, std::size_t indent) {
         out << Indent(indent) << "}\n";
         return true;
     }
 
-    bool createFunctionStub(CsWrapperGen &gen, MLLIFContext &context, const FunctionDecl &node, std::ostream &out, const std::size_t indent) {
+    bool createFunctionStub(CsBridgeGen &gen, MLLIFContext &context, const FunctionDecl &node, std::ostream &out, const std::size_t indent) {
 
         const auto isMemberFn = std::dynamic_pointer_cast<ObjectDecl>(node.parent()) != nullptr;
 
@@ -115,7 +115,7 @@ namespace mllif::cs {
         return true;
     }
 
-    bool CsWrapperGen::handleFunctionBegin(MLLIFContext &context, const FunctionDecl &node, std::ostream &out, std::size_t indent) {
+    bool CsBridgeGen::handleFunctionBegin(MLLIFContext &context, const FunctionDecl &node, std::ostream &out, std::size_t indent) {
         const auto ret = TypeToCs(node.returns());
         if (!ret) {
             context.error(std::format("unrecognized return type of function '{}'", node.symbol()));
@@ -130,7 +130,7 @@ namespace mllif::cs {
 
         return true;
     }
-    bool CsWrapperGen::handleFunctionEnd(MLLIFContext &context, const FunctionDecl &node, std::ostream &out, std::size_t indent) {
+    bool CsBridgeGen::handleFunctionEnd(MLLIFContext &context, const FunctionDecl &node, std::ostream &out, std::size_t indent) {
         out << ") {\n";
         out << Indent(indent + 1) << "unsafe {\n";
         createFunctionStub(*this, context, node, out, indent + 2);
@@ -138,7 +138,7 @@ namespace mllif::cs {
         out << Indent(indent) << "}\n";
         return true;
     }
-    bool CsWrapperGen::handleMethodBegin(MLLIFContext &context, const MethodDecl &node, std::ostream &out, std::size_t indent) {
+    bool CsBridgeGen::handleMethodBegin(MLLIFContext &context, const MethodDecl &node, std::ostream &out, std::size_t indent) {
         const auto ret = TypeToCs(node.returns());
         if (!ret) {
             context.error(std::format("unrecognized builtin type '{}'", node.returns().terms()[0]));
@@ -148,7 +148,7 @@ namespace mllif::cs {
         out << Indent(indent) << "public " << ret.value() << ' ' << node.name() << '(';
         return true;
     }
-    bool CsWrapperGen::handleParam(MLLIFContext &context, const ParamDecl &node, std::ostream &out, std::size_t indent) {
+    bool CsBridgeGen::handleParam(MLLIFContext &context, const ParamDecl &node, std::ostream &out, std::size_t indent) {
         const auto type = TypeToCs(node.type());
         if (!type) {
             context.error(std::format("unrecognized builtin type '{}'", node.type().terms()[0]));
@@ -158,7 +158,7 @@ namespace mllif::cs {
         out << type.value() << ' ' << node.name();
         return true;
     }
-    void CsWrapperGen::writeParamDelimiter(std::ostream &os) {
+    void CsBridgeGen::writeParamDelimiter(std::ostream &os) {
         os << ", ";
     }
 } // namespace mllif::cs

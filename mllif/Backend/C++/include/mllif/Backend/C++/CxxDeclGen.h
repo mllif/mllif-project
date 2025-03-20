@@ -16,10 +16,10 @@
 
 #pragma once
 
-#include <mllif/Backend/C++/CxxWrapperGen.h>
+#include <mllif/Backend/C++/CxxBridgeGen.h>
 
 namespace mllif::cxx {
-    class CxxDeclGen final : public CxxWrapperGen {
+    class CxxDeclGen final : public CxxBridgeGen {
       public:
         bool handleAssemblyBegin(MLLIFContext &context, const AssemblyDecl &node, std::ostream &out, std::size_t indent) override;
         bool handleObjectBegin(MLLIFContext &context, const ObjectDecl &node, std::ostream &out, std::size_t indent) override;

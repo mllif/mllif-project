@@ -32,9 +32,9 @@ namespace mllif {
 
 namespace mllif {
 
-    class WrapperGen {
+    class BridgeGen {
       public:
-        virtual ~WrapperGen() = default;
+        virtual ~BridgeGen() = default;
 
 #define MLLIF_GEN_HANDLER(type,...) virtual bool handle##type##__VA_ARGS__ (MLLIFContext& context, const type##Decl &node, std::ostream& out, std::size_t indent)
 

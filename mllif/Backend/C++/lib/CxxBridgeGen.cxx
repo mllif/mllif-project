@@ -16,7 +16,7 @@
 
 #include "pch.h"
 
-#include <mllif/Backend/C++/CxxWrapperGen.h>
+#include <mllif/Backend/C++/CxxBridgeGen.h>
 #include <mllif/Backend/C++/Type.h>
 #include <mllif/Backend/Context.h>
 
@@ -27,37 +27,37 @@ namespace mllif {
     }
 }
 
-bool mllif::cxx::CxxWrapperGen::handleAssemblyBegin(MLLIFContext &context, const AssemblyDecl &node, std::ostream &out, std::size_t indent) {
+bool mllif::cxx::CxxBridgeGen::handleAssemblyBegin(MLLIFContext &context, const AssemblyDecl &node, std::ostream &out, std::size_t indent) {
     return true;
 }
 
-bool mllif::cxx::CxxWrapperGen::handleAssemblyEnd(MLLIFContext &context, const AssemblyDecl &node, std::ostream &out, std::size_t indent) {
+bool mllif::cxx::CxxBridgeGen::handleAssemblyEnd(MLLIFContext &context, const AssemblyDecl &node, std::ostream &out, std::size_t indent) {
     return true;
 }
 
-bool mllif::cxx::CxxWrapperGen::handleNamespaceBegin(MLLIFContext &context, const NamespaceDecl &node, std::ostream &out, std::size_t indent) {
+bool mllif::cxx::CxxBridgeGen::handleNamespaceBegin(MLLIFContext &context, const NamespaceDecl &node, std::ostream &out, std::size_t indent) {
     out << Indent(indent) << "namespace " << node.name() << " {\n";
     return true;
 }
 
-bool mllif::cxx::CxxWrapperGen::handleNamespaceEnd(MLLIFContext &context, const NamespaceDecl &node, std::ostream &out, std::size_t indent) {
+bool mllif::cxx::CxxBridgeGen::handleNamespaceEnd(MLLIFContext &context, const NamespaceDecl &node, std::ostream &out, std::size_t indent) {
     out << Indent(indent) << "} // namespace " << node.name() << '\n';
     return true;
 }
 
-bool mllif::cxx::CxxWrapperGen::handleObjectBegin(MLLIFContext &context, const ObjectDecl &node, std::ostream &out, std::size_t indent) {
+bool mllif::cxx::CxxBridgeGen::handleObjectBegin(MLLIFContext &context, const ObjectDecl &node, std::ostream &out, std::size_t indent) {
     out << Indent(indent) << "class " << node.name() << " {\n"
         << Indent(indent + 1) << "char __data[" << node.size() << "];\n"
         << Indent(indent) << "public:\n";
     return true;
 }
 
-bool mllif::cxx::CxxWrapperGen::handleObjectEnd(MLLIFContext &context, const ObjectDecl &node, std::ostream &out, std::size_t indent) {
+bool mllif::cxx::CxxBridgeGen::handleObjectEnd(MLLIFContext &context, const ObjectDecl &node, std::ostream &out, std::size_t indent) {
     out << Indent(indent) << "} __attribute((aligned(" << node.align() << ")));\n";
     return true;
 }
 
-bool mllif::cxx::CxxWrapperGen::handleFunctionBegin(MLLIFContext &context, const FunctionDecl &node, std::ostream &out, std::size_t indent) {
+bool mllif::cxx::CxxBridgeGen::handleFunctionBegin(MLLIFContext &context, const FunctionDecl &node, std::ostream &out, std::size_t indent) {
     const auto ret = TypeToCxx(node.returns());
     if (!ret) {
         context.error(std::format("unrecognized return type of function '{}'", node.symbol()));
@@ -73,12 +73,12 @@ bool mllif::cxx::CxxWrapperGen::handleFunctionBegin(MLLIFContext &context, const
     return true;
 }
 
-bool mllif::cxx::CxxWrapperGen::handleFunctionEnd(MLLIFContext &context, const FunctionDecl &node, std::ostream &out, std::size_t indent) {
+bool mllif::cxx::CxxBridgeGen::handleFunctionEnd(MLLIFContext &context, const FunctionDecl &node, std::ostream &out, std::size_t indent) {
     out << ") asm(\"" << node.symbol() << "\");\n";
     return true;
 }
 
-bool mllif::cxx::CxxWrapperGen::handleMethodBegin(MLLIFContext &context, const MethodDecl &node, std::ostream &out, std::size_t indent) {
+bool mllif::cxx::CxxBridgeGen::handleMethodBegin(MLLIFContext &context, const MethodDecl &node, std::ostream &out, std::size_t indent) {
     const auto ret = TypeToCxx(node.returns());
     if (!ret) {
         context.error(std::format("unrecognized builtin type '{}'", node.returns().terms()[0]));
@@ -89,7 +89,7 @@ bool mllif::cxx::CxxWrapperGen::handleMethodBegin(MLLIFContext &context, const M
     return true;
 }
 
-bool mllif::cxx::CxxWrapperGen::handleParam(MLLIFContext &context, const ParamDecl &node, std::ostream &out, std::size_t indent) {
+bool mllif::cxx::CxxBridgeGen::handleParam(MLLIFContext &context, const ParamDecl &node, std::ostream &out, std::size_t indent) {
     const auto type = TypeToCxx(node.type());
     if (!type) {
         context.error(std::format("unrecognized builtin type '{}'", node.type().terms()[0]));
@@ -100,6 +100,6 @@ bool mllif::cxx::CxxWrapperGen::handleParam(MLLIFContext &context, const ParamDe
     return true;
 }
 
-void mllif::cxx::CxxWrapperGen::writeParamDelimiter(std::ostream &os) {
+void mllif::cxx::CxxBridgeGen::writeParamDelimiter(std::ostream &os) {
     os << ", ";
 }

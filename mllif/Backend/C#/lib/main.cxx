@@ -18,7 +18,7 @@
 
 #include <cstring>
 #include <memory>
-#include <mllif/Backend/C#/CsWrapperGen.h>
+#include <mllif/Backend/C#/CsBridgeGen.h>
 #include <mllif/Backend/Context.h>
 #include <mllif/Backend/Decl.h>
 #include <mllif/Backend/Stdin.h>
@@ -61,7 +61,7 @@ auto main(int argc, char *argv[]) -> int {
     }
 
     {
-        mllif::cs::CsWrapperGen wrapperGen(argv[1]);
+        mllif::cs::CsBridgeGen wrapperGen(argv[1]);
         wrapperGen.handleDecl(context, root, std::cout, 0);
 
         if (!context) {
