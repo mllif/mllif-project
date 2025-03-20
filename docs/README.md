@@ -1,6 +1,6 @@
 # 🎉 Welcome to MLLIF!
 
-***MLLIF*** is a ***M***LIR based ***L***anguage to ***L***anguage ***I***nteroperability ***F***lyover -
+***MLLIF*** is a <b><i>M</i></b>LIR-based <b><i>L</i></b>anguage-to-<b><i>L</i></b>anguage <b><i>I</i></b>nteroperability <b><i>F</i></b>lyover -
 with a goal to integrate API of all programming languages.
 
 For details, See [docs](https://mllif.sharp0802.com)!
@@ -11,7 +11,7 @@ For details, See [docs](https://mllif.sharp0802.com)!
 |:---:|:--------:|:-------:|
 |  C  |    ⚗️    |   📌    |
 | C++ |    ⚗️    |   ⚗️    |
-| C#  |    📌    |   🦺    |
+| C#  |    🦺    |   ⚗️    |
 
 - ✅ : Implemented, tested enough
 - ⚗️ : Implemented, but in experimental state
