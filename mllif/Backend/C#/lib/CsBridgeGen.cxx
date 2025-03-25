@@ -44,7 +44,7 @@ namespace mllif::cs {
         return true;
     }
     bool CsBridgeGen::handleObjectBegin(MLLIFContext &context, const ObjectDecl &node, std::ostream &out, std::size_t indent) {
-        out << Indent(indent) << "[System.Runtime.InteropServices.StructLayout(LayoutKind.Explicit, Size=" << node.size() << ", Pack=" << node.align() << ")]\n"
+        out << Indent(indent) << "[System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Explicit, Size=" << node.size() << ", Pack=" << node.align() << ")]\n"
             << Indent(indent) << "public struct " << node.name() << " {\n";
         return true;
     }
@@ -115,6 +115,20 @@ namespace mllif::cs {
         return true;
     }
 
+    static bool IsUnsafe(const FunctionDecl &node) {
+        if (node.returns().refs())
+            return true;
+
+        for (const auto &item : node.children()) {
+            if (auto arg = std::dynamic_pointer_cast<ParamDecl>(item);
+                arg && arg->type().refs()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     bool CsBridgeGen::handleFunctionBegin(MLLIFContext &context, const FunctionDecl &node, std::ostream &out, std::size_t indent) {
         const auto ret = TypeToCs(node.returns());
         if (!ret) {
@@ -126,7 +140,12 @@ namespace mllif::cs {
             context.error(std::format("C# doesn't allow out-of-class functions ({})", node.symbol()));
             return false;
         }
-        out << Indent(indent) << "public static " << ret.value() << ' ' << node.name() << '(';
+
+        out << Indent(indent) << "public static ";
+        if (IsUnsafe(node)) {
+            out << "unsafe ";
+        }
+        out << ret.value() << ' ' << node.name() << '(';
 
         return true;
     }
@@ -145,7 +164,11 @@ namespace mllif::cs {
             return false;
         }
 
-        out << Indent(indent) << "public " << ret.value() << ' ' << node.name() << '(';
+        out << Indent(indent) << "public ";
+        if (IsUnsafe(node)) {
+            out << "unsafe ";
+        }
+        out << ret.value() << ' ' << node.name() << '(';
         return true;
     }
     bool CsBridgeGen::handleParam(MLLIFContext &context, const ParamDecl &node, std::ostream &out, std::size_t indent) {
