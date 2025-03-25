@@ -3,14 +3,13 @@ project(MLLIFMLIR LANGUAGES CXX)
 file(GLOB_RECURSE SOURCES lib/*.*)
 file(GLOB_RECURSE HEADERS include/*.*)
 
+mllif_target(mllif-mlir)
 add_executable(mllif-mlir ${SOURCES} ${HEADERS})
+target_sources(mllif-mlir PUBLIC FILE_SET HEADERS FILES ${HEADERS})
+
 target_include_directories(mllif-mlir PUBLIC include)
 target_include_directories(mllif-mlir PRIVATE lib)
 target_precompile_headers(mllif-mlir PUBLIC lib/pch.h)
-set_target_properties(mllif-mlir PROPERTIES
-        FRAMEWORK TRUE
-        PUBLIC_HEADER "${HEADERS}"
-)
 
 target_link_libraries(mllif-mlir PUBLIC
         MLLIFSharedFront

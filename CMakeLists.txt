@@ -17,11 +17,21 @@ include(CTest)
 set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+function(mllif_target target)
+    get_property(tmp GLOBAL PROPERTY MLLIF_TARGET_LIST)
+    list(APPEND tmp ${target})
+    set_property(GLOBAL PROPERTY MLLIF_TARGET_LIST ${tmp})
+endfunction()
+
 add_subdirectory(mllif)
 
-install(TARGETS MLLIFCFront mllif-mlir MLLIFSharedFront
+get_property(MLLIF_TARGET_LIST GLOBAL PROPERTY MLLIF_TARGET_LIST)
+message(STATUS "Selected Components: ${MLLIF_TARGET_LIST}")
+
+install(FILES cmake/UseMLLIF.cmake DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake")
+install(TARGETS ${MLLIF_TARGET_LIST}
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
-        PUBLIC_HEADER DESTINATION include
+        FILE_SET HEADERS DESTINATION include
 )
