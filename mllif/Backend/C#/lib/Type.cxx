@@ -21,12 +21,12 @@ std::optional<std::string> mllif::cs::TypeToCs(const Type &type) {
 
     if (type.builtin()) {
         static std::map<std::string, std::string> map = {
-#define T_INT(bit) { "s" #bit , "System.Int" #bit }, { "u" #bit , "System.UInt" #bit }
-            { "s8", "System.SByte" },
-            { "u8", "System.Byte" },
-            T_INT(16),
-            T_INT(32),
-            T_INT(64),
+#define T_INT(bit, lit) { "s" #bit , #lit }, { "u" #bit , "u" #lit }
+            { "s8", "sbyte" },
+            { "u8", "byte" },
+            T_INT(16, short),
+            T_INT(32, int),
+            T_INT(64, long),
             { "s128", "System.Int128" },
             { "u128", "System.UInt128" },
             { "fp16", "System.Half" },
