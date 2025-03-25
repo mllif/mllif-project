@@ -71,8 +71,6 @@ std::shared_ptr<mllif::Decl> mllif::Decl::Create(MLLIFContext &context, rapidxml
 #undef NODE_INIT
 #undef NODE_HANDLER
 
-    std::cerr << node->name() << std::endl;
-
     if (!handlers.contains(node->name())) {
         context.error(std::format("unrecognized tag '{}'", node->name()));
         return nullptr;
