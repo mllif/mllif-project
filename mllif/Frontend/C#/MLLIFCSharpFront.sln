@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MLLIFCSharpFront", "lib\MLLIFCSharpFront.csproj", "{89C6C9AF-A014-4581-8812-C496D04FF864}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MLLIFCSharpFrontTest", "test\MLLIFCSharpFrontTest.csproj", "{765F4ADA-C8EA-47F2-A5D9-5DDF0EDFD032}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{89C6C9AF-A014-4581-8812-C496D04FF864}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{89C6C9AF-A014-4581-8812-C496D04FF864}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{89C6C9AF-A014-4581-8812-C496D04FF864}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{89C6C9AF-A014-4581-8812-C496D04FF864}.Release|Any CPU.Build.0 = Release|Any CPU
+		{765F4ADA-C8EA-47F2-A5D9-5DDF0EDFD032}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{765F4ADA-C8EA-47F2-A5D9-5DDF0EDFD032}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{765F4ADA-C8EA-47F2-A5D9-5DDF0EDFD032}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{765F4ADA-C8EA-47F2-A5D9-5DDF0EDFD032}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
