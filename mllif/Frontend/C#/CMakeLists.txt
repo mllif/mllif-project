@@ -7,6 +7,6 @@ add_custom_target(MLLIFCSharpFront ALL
 
 add_test(
         NAME use-csharp-frontend
-        COMMAND dotnet build --artifacts-path "${CMAKE_CURRENT_BINARY_DIR}/test" --output "${CMAKE_CURRENT_BINARY_DIR}/test"
+        COMMAND dotnet run --artifacts-path "${CMAKE_CURRENT_BINARY_DIR}/test" --output "${CMAKE_CURRENT_BINARY_DIR}/test"
         WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/test"
 )
