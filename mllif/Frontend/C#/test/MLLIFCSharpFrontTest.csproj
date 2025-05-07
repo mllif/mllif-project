@@ -9,7 +9,7 @@
     </PropertyGroup>
     
     <ItemGroup>
-        <ProjectReference Include="..\lib\MLLIFCSharpFront.csproj">
+        <ProjectReference Include="..\lib\MLLIFCSharpFront\MLLIFCSharpFront.csproj">
             <OutputItemType>Analyzer</OutputItemType>
             <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
         </ProjectReference>

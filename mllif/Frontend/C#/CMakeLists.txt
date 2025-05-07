@@ -1,7 +1,12 @@
 project(MLLIFCSharpFront)
 
 add_custom_target(MLLIFCSharpFront ALL
-        COMMAND dotnet build --artifacts-path "${CMAKE_CURRENT_BINARY_DIR}/lib" --output "${CMAKE_CURRENT_BINARY_DIR}/lib"
+        COMMAND dotnet build --artifacts-path "${CMAKE_CURRENT_BINARY_DIR}/lib/MLLIFCSharpFront" --output "${CMAKE_CURRENT_BINARY_DIR}/lib"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/lib"
+)
+
+add_custom_target(MLLIFCSharpFrontBuild ALL
+        COMMAND dotnet build --artifacts-path "${CMAKE_CURRENT_BINARY_DIR}/lib/MLLIFCSharpFrontBuild" --output "${CMAKE_CURRENT_BINARY_DIR}/lib"
         WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/lib"
 )
 
