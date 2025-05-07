@@ -74,8 +74,8 @@ namespace {
     auto GetPath(const clang::NamedDecl *decl) -> std::vector<std::string> {
         std::vector<std::string> namespaces;
         for (; decl; decl = dyn_cast<clang::NamedDecl>(decl->getDeclContext())) {
-            if (auto name = decl->getName(); !name.empty()) {
-                namespaces.insert(namespaces.begin(), name.str());
+            if (auto name = decl->getDeclName().getAsString(); !name.empty()) {
+                namespaces.insert(namespaces.begin(), name);
             }
         }
 
