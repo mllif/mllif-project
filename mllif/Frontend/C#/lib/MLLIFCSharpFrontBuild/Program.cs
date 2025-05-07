@@ -37,13 +37,19 @@ internal static class Program
             Console.Error.WriteLine($"error: no such project '{projectPath}'");
             return -1;
         }
+
+        var start = DateTime.Now;
         
         var compilation = await project
             .WithCompilationOptions(compileArgs.CompilationOptions)
             .GetCompilationAsync();
+        
+        var elapsed = DateTime.Now - start;
+        Console.Error.WriteLine($"info: {elapsed.TotalSeconds:F1}s taken to build");
+        
         if (compilation is null)
         {
-            Console.Error.WriteLine("compilation is null");
+            Console.Error.WriteLine("error: failed to build project");
             return -1;
         }
 
