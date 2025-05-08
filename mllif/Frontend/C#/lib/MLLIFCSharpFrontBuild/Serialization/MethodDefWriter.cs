@@ -44,7 +44,7 @@ public readonly ref struct MethodDefWriter(IMethodSymbol symbol) : ICodeWriter
               {{symbol.ContainingType.GetFullName("::")}}::{{symbol.Name}}({{intParmsStr}}) {
                 static {{symbol.ReturnType.ToNativeBridgeType()}} (*__proxy)({{brParmsStr}}) = nullptr;
                 if (!__proxy) {
-                  (decltype(__proxy))::get_function_pointer_fn("{{symbol.ContainingType.MetadataName}}", "{{symbol.Name}}", "{{delegateType.MetadataName}}", nullptr, nullptr, &__proxy);
+                  (decltype(__proxy))::__s_get_function_pointer_fn("{{symbol.ContainingType.MetadataName}}", "{{symbol.Name}}", "{{delegateType.MetadataName}}", nullptr, nullptr, &__proxy);
                 }
               """);
         w.Indent++;
