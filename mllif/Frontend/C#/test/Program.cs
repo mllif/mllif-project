@@ -13,7 +13,7 @@ public partial class Program
 
         var self = GCHandle.Alloc(prog);
         var two  = GCHandle.Alloc("2");
-        var r = __mllif__Hello__s32_voidp(GCHandle.ToIntPtr(self), 1, GCHandle.ToIntPtr(two));
+        var r = __mllif__Hello_s32_voidp(GCHandle.ToIntPtr(self), 1, GCHandle.ToIntPtr(two));
         two.Free();
         self.Free();
         

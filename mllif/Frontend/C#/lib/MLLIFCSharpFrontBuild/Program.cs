@@ -3,13 +3,13 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.MSBuild;
 using MLLIFCSharpFrontBuild.Diagnostics;
+using MLLIFCSharpFrontBuild.Serialization;
+using Humanizer;
 
 namespace MLLIFCSharpFrontBuild;
 
 internal static class Program
 {
-    private static IGenerator[] _generators = [ new HeaderGenerator(), new SourceGenerator() ];
-    
     private static async Task<int> Main(string[] args)
     {
         using var msbuild = MSBuildWorkspace.Create();
@@ -22,9 +22,9 @@ internal static class Program
             return -1;
         }
 
-        var projectPath = args[0];
+        var projectPath    = args[0];
         var compileArgsStr = args.Skip(1);
-        var compileArgs = CSharpCommandLineParser.Default.Parse(compileArgsStr, Environment.CurrentDirectory, null);
+        var compileArgs    = CSharpCommandLineParser.Default.Parse(compileArgsStr, Environment.CurrentDirectory, null);
 
         Project project;
 
@@ -38,15 +38,19 @@ internal static class Program
             return -1;
         }
 
-        var start = DateTime.Now;
-        
-        var compilation = await project
-            .WithCompilationOptions(compileArgs.CompilationOptions)
-            .GetCompilationAsync();
-        
-        var elapsed = DateTime.Now - start;
-        Console.Error.WriteLine($"info: {elapsed.TotalSeconds:F1}s taken to build");
-        
+        // Get compilation
+        Compilation? compilation;
+        {
+            var start = DateTime.Now;
+
+            compilation = await project
+                .WithCompilationOptions(compileArgs.CompilationOptions)
+                .GetCompilationAsync();
+
+            var elapsed = DateTime.Now - start;
+            Console.Error.WriteLine($"info: {elapsed.Humanize()} taken to build");
+        }
+
         if (compilation is null)
         {
             Console.Error.WriteLine("error: failed to build project");
@@ -54,19 +58,19 @@ internal static class Program
         }
 
         await using var dest   = new StringWriter();
-        await using var writer = new IndentedTextWriter(dest, "  ");
-
-        var ns = compilation.Assembly.GlobalNamespace;
+        await using var writer = new CodeWriter(dest, "  ");
         
-        foreach (var generator in _generators)
+        // Write bindings
         {
-            var diags = generator.Run(writer, ns, project).ToArray();
-            if (diags.Length == 0)
-                continue;
-            
-            diags.PrintDiagnostics();
-            return -1;
+            var start = DateTime.Now;
+
+            var ns = compilation.Assembly.GlobalNamespace;
+            new NamespaceWriter(ns).WriteTo(writer, new CodeContext());
+
+            var elapsed = DateTime.Now - start;
+            Console.Error.WriteLine($"info: {elapsed.Humanize()} taken to generate");
         }
+        Console.WriteLine(dest.ToString());
 
         return 0;
     }
