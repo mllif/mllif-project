@@ -113,9 +113,15 @@ public class BindGenerator : IIncrementalGenerator
         builder.Append(") {\n");
 
         if (!symbol.IsStatic)
-            builder.Append("\t\tvar handle = __GCHandle.FromIntPtr(self);\n");
+            builder.Append("\t\tvar handle = System.Runtime.InteropServices.GCHandle.FromIntPtr(self);\n");
 
         builder.Append("\t\treturn ");
+
+        if (symbol.ReturnType.IsReferenceType)
+        {
+            builder.Append("System.Runtime.InteropServices.GCHandle.ToIntPtr(");
+            builder.Append("System.Runtime.InteropServices.GCHandle.Alloc(");
+        }
 
         if (!symbol.IsStatic)
             builder.Append("(handle.Target as ").Append(symbol.ContainingType.ToDisplayString()).Append(").");
@@ -130,11 +136,14 @@ public class BindGenerator : IIncrementalGenerator
             var param = symbol.Parameters[i];
 
             if (param.Type.IsReferenceType)
-                builder.Append("__GCHandle.FromIntPtr(");
+                builder.Append("System.Runtime.InteropServices.GCHandle.FromIntPtr(");
             builder.Append(param.Name);
             if (param.Type.IsReferenceType)
                 builder.Append(").Target as ").Append(param.Type.ToDisplayString());
         }
+
+        if (symbol.ReturnType.IsReferenceType)
+            builder.Append("))");
 
         builder.Append(");\n");
 
@@ -143,8 +152,6 @@ public class BindGenerator : IIncrementalGenerator
         spc.AddSource($"{symbol.ContainingType.Name}.{symbol.Name}.g.cs",
             $$"""
               namespace {{symbol.ContainingType.ContainingNamespace.ToDisplayString()}};
-
-              using __GCHandle = System.Runtime.InteropServices.GCHandle;
                   
               public partial class {{symbol.ContainingType.Name}} {
               {{builder}}
