@@ -11,7 +11,7 @@ For details, See [docs](https://mllif.sharp0802.com)!
 |:---:|:--------:|:-------:|
 |  C  |    ⚗️    |   📌    |
 | C++ |    ⚗️    |   ⚗️    |
-| C#  |    🦺    |   ⚗️    |
+| C#  |    ⚗️    |   ⚗️    |
 
 - ✅ : Implemented, tested enough
 - ⚗️ : Implemented, but in experimental state
