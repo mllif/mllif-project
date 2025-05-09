@@ -3,10 +3,13 @@ using MLLIFCSharpFront;
 
 namespace MLLIFCSharpFrontBuild.Serialization;
 
-public readonly ref struct MethodDeclWriter(IMethodSymbol symbol) : ICodeWriter
+public readonly struct MethodDeclWriter(IMethodSymbol symbol) : ICodeWriter
 {
-    public void WriteTo(CodeWriter w, CodeContext ctx)
+    public IEnumerable<WorkspaceDiagnostic> WriteTo(CodeWriter w, CodeContext ctx)
     {
+        if (!symbol.IsTarget())
+            yield break;
+        
         if (symbol.IsStatic)
             w.Write("static ");
         
@@ -14,7 +17,7 @@ public readonly ref struct MethodDeclWriter(IMethodSymbol symbol) : ICodeWriter
             w.Write("void ");
         else
         {
-            w.Write(symbol.ReturnType.ToNativeInterfaceType());
+            w.Write(symbol.ReturnType.ToNativeInterfaceType(true));
             w.Write(' ');
         }
 

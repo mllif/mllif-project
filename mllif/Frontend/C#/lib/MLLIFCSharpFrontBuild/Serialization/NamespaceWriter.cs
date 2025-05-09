@@ -3,22 +3,23 @@ using MLLIFCSharpFront;
 
 namespace MLLIFCSharpFrontBuild.Serialization;
 
-public readonly ref struct NamespaceWriter(INamespaceSymbol symbol) : ICodeWriter
+public readonly struct NamespaceWriter(INamespaceSymbol symbol) : ICodeWriter
 {
-    public void WriteTo(CodeWriter w, CodeContext ctx)
+    private static string Stub;
+    
+    static NamespaceWriter()
+    {
+        Stub = Embedded.Resource("BridgeStub.h").GetAwaiter().GetResult();
+    }
+    
+    public IEnumerable<WorkspaceDiagnostic> WriteTo(CodeWriter w, CodeContext ctx)
     {
         if (!symbol.IsTarget())
-            return;
+            yield break;
 
         if (symbol.IsGlobalNamespace)
         {
-            w.WriteLine(
-                """
-                #pragma once
-                
-                #include <cstdint>
-                
-                """);
+            w.WriteLine(Stub);
         }
         else
         {
@@ -26,28 +27,15 @@ public readonly ref struct NamespaceWriter(INamespaceSymbol symbol) : ICodeWrite
             w.Indent++;
         }
 
-        foreach (var ns in symbol.GetNamespaceMembers()) 
-            new NamespaceWriter(ns).WriteTo(w, ctx);
-        
-        foreach (var t in symbol.GetTypeMembers().Where(SymbolExtension.IsTarget))
-            new TypeWriter(t).WriteTo(w, ctx);
+        foreach (var ns in symbol.GetNamespaceMembers())
+        foreach (var diag in new NamespaceWriter(ns).WriteTo(w, ctx))
+            yield return diag;
 
-        if (symbol.IsGlobalNamespace)
-        {
-            w.WriteLine(
-                """
-                
-                namespace mllif {
-                #if _WIN32
-                  int init(const wchar_t *runtimeConfigPath, const wchar_t *assemblyPath);
-                #else
-                  int init(const char *runtimeConfigPath, const char *assemblyPath);
-                #endif
-                  void close();
-                }
-                """);
-        }
-        else
+        foreach (var t in symbol.GetTypeMembers().Where(SymbolExtension.IsTarget))
+        foreach (var diag in new TypeDeclWriter(t).WriteTo(w, ctx))
+            yield return diag;
+
+        if (!symbol.IsGlobalNamespace)
         {
             w.Indent--;
             w.WriteLine("}");

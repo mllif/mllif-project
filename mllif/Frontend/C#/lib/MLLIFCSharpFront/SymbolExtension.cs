@@ -12,6 +12,15 @@ public static class SymbolExtension
         return symbol.GetAttributes().Any(attr => attr.AttributeClass?.Name == "ExportAttribute");
     }
 
+    public static IEnumerable<INamedTypeSymbol> GetAllTypes(this INamespaceOrTypeSymbol symbol)
+    {
+        if (symbol is INamedTypeSymbol t)
+            yield return t;
+        foreach (var child in symbol.GetMembers().OfType<INamespaceOrTypeSymbol>())
+        foreach (var ret in child.GetAllTypes())
+            yield return ret;
+    }
+
     public static string GetFullName(this ISymbol symbol, string delimiter = ".")
     {
         var queue = new Stack<string>();
@@ -74,7 +83,7 @@ public static class SymbolExtension
         };
     }
 
-    public static string ToNativeInterfaceType(this ITypeSymbol type)
+    public static string ToNativeInterfaceType(this ITypeSymbol type, bool ret = false)
     {
         var name = type.GetFullName("::");
         return name switch
@@ -90,8 +99,47 @@ public static class SymbolExtension
             "System::Half"   => "_Float16",
             "System::Single" => "float",
             "System::Double" => "double",
-            _               => $"{name}&"
+            _                => ret ? name : $"{name}&"
         };
+    }
+
+    private static bool IsRootNamespace(ISymbol symbol) 
+    {
+        INamespaceSymbol? s;
+        return (s = symbol as INamespaceSymbol) != null && s.IsGlobalNamespace;
+    }
+
+    public static string GetFullyQualifiedName(this ISymbol? s)
+    {
+        if (s == null || IsRootNamespace(s))
+        {
+            return string.Empty;
+        }
+        
+        var asm = s.ContainingAssembly;
+
+        var sb   = new StringBuilder(s.MetadataName);
+        var last = s;
+
+        s = s.ContainingSymbol;
+
+        while (!IsRootNamespace(s))
+        {
+            if (s is ITypeSymbol && last is ITypeSymbol)
+            {
+                sb.Insert(0, '+');
+            }
+            else
+            {
+                sb.Insert(0, '.');
+            }
+
+            sb.Insert(0, s.OriginalDefinition.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
+            //sb.Insert(0, s.MetadataName);
+            s = s.ContainingSymbol;
+        }
+
+        return $"{sb}, {asm}";
     }
 
     private static Diagnostic UnsupportedType(ITypeSymbol type)

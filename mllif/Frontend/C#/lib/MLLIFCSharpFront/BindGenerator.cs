@@ -18,6 +18,14 @@ public class BindGenerator : IIncrementalGenerator
                 namespace MLLIF {
                     [AttributeUsage(AttributeTargets.Method, AllowMultiple=false, Inherited=false)]
                     internal sealed class ExportAttribute : Attribute {}
+                    
+                    public static class Internal {
+                        public delegate void FreeDelegate(IntPtr ptr);
+                    
+                        public static void Free(IntPtr ptr) {
+                            System.Runtime.InteropServices.GCHandle.FromIntPtr(ptr).Free();
+                        }
+                    }
                 }
                 """);
         });

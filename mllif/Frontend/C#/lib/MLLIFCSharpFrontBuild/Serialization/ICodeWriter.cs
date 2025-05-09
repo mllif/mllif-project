@@ -1,6 +1,8 @@
+using Microsoft.CodeAnalysis;
+
 namespace MLLIFCSharpFrontBuild.Serialization;
 
 public interface ICodeWriter
 {
-    public void WriteTo(CodeWriter w, CodeContext ctx);
+    public IEnumerable<WorkspaceDiagnostic> WriteTo(CodeWriter w, CodeContext ctx);
 }
