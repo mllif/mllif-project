@@ -66,7 +66,7 @@ auto mllif::mlir::cir::CIRType::From(const ::mlir::Type &type, const std::shared
         return std::make_shared<CIRPointerType>(From(pointer.getPointee(), module));
     }
 
-    if (const auto _struct = dyn_cast<::cir::StructType>(type)) {
+    if (const auto _struct = dyn_cast<::cir::RecordType>(type)) {
         const ::mlir::DataLayout layout{module->clone()};
         const auto params = module->getDataLayoutSpec().getEntries();
 
